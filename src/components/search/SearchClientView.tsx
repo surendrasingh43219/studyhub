@@ -216,9 +216,9 @@ export function SearchClientView({ initialQuery = '' }: { initialQuery?: string 
               <BookOpen className="w-4 h-4 text-cyan-400" /> Matching Textbooks
             </h3>
             <div className="space-y-3">
-              {filteredBooks.map((book) => (
+              {filteredBooks.map((book, idx) => (
                 <div
-                  key={book.id}
+                  key={`${book.id}-${idx}`}
                   className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all"
                 >
                   <div className="space-y-1">

@@ -164,9 +164,9 @@ export function AdminClientView() {
           </p>
 
           <div className="space-y-3">
-            {pendingBooks.map((book) => (
+            {pendingBooks.map((book, idx) => (
               <div
-                key={book.id}
+                key={`${book.id}-${idx}`}
                 className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4"
               >
                 <div className="space-y-1">

@@ -3,8 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { getLocalUploadedBooks, saveLocalUploadedBook, type StoredBook } from '@/lib/books-store'
 import { isR2Configured, uploadBufferToR2 } from '@/lib/storage/r2'
-import fs from 'fs'
-import path from 'path'
+
+export const runtime = 'edge'
 
 function mapLicenseToEnum(lic: string): string {
   if (!lic) return 'Creative Commons (CC-BY)'
@@ -187,14 +187,18 @@ export async function POST(request: NextRequest) {
 
         // 2. Also save to local public/uploads if filesystem is writable
         try {
-          const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
-          if (!fs.existsSync(uploadsDir)) {
-            fs.mkdirSync(uploadsDir, { recursive: true })
-          }
-          const fullDiskPath = path.join(uploadsDir, safeName)
-          fs.writeFileSync(fullDiskPath, buffer)
-          if (!savedFilePath) {
-            savedFilePath = `/uploads/${safeName}`
+          if (typeof process !== 'undefined' && (process as any).release?.name === 'node') {
+            const fs = (eval)('require')('fs')
+            const path = (eval)('require')('path')
+            const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
+            if (!fs.existsSync(uploadsDir)) {
+              fs.mkdirSync(uploadsDir, { recursive: true })
+            }
+            const fullDiskPath = path.join(uploadsDir, safeName)
+            fs.writeFileSync(fullDiskPath, buffer)
+            if (!savedFilePath) {
+              savedFilePath = `/uploads/${safeName}`
+            }
           }
         } catch (diskErr) {
           console.log('Local disk write skipped (Cloudflare/serverless environment)')

@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { AdminClientView } from '@/components/admin/AdminClientView'
 
+export const runtime = 'edge'
+
 export const metadata = {
   title: 'Admin Console | StudyHub',
   description: 'Moderation, user accounts, and library approvals.',

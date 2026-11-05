@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { isR2Configured, getR2SignedUploadUrl } from '@/lib/storage/r2'
 
+export const runtime = 'edge'
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()

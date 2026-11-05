@@ -1,5 +1,7 @@
 import { SearchClientView } from '@/components/search/SearchClientView'
 
+export const runtime = 'edge'
+
 interface SearchPageProps {
   searchParams: Promise<{ q?: string }>
 }

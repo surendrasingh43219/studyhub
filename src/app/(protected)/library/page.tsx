@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { LibraryClientView } from '@/components/library/LibraryClientView'
 import { getLocalUploadedBooks } from '@/lib/books-store'
 
+export const runtime = 'edge'
+
 export const metadata = {
   title: 'Open-Source Library | StudyHub',
   description: 'Explore, read online, and download educational textbooks and reference works.',

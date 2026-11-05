@@ -8,7 +8,7 @@
     "class_level": "Undergraduate / Advanced",
     "category": "Programming",
     "language": "English",
-    "description": "",
+    "description": "Essential guide to working with data in Python using IPython, NumPy, Pandas, Matplotlib, Scikit-Learn, and related libraries.",
     "file_format": "pdf",
     "file_size_bytes": 22199177,
     "page_count": 973,
@@ -17,36 +17,9 @@
     "file_path": "/uploads/1793857830883-Python_Data_Science_Handbook.pdf",
     "download_count": 0,
     "rating_avg": 5,
-    "tags": [],
+    "tags": ["python", "data-science", "machine-learning"],
     "uploader_id": "dd76898e-abd7-4792-8221-c54b7ae3ed27",
     "created_at": "2026-11-05T05:50:34.895Z"
-  },
-  {
-    "id": "71c711b1-fa9c-4479-a4a8-7ed1c467bd94",
-    "title": "the personal mba josh kaufman 10th anniversary edition 527 pages compress",
-    "author": "Josh Kaufman",
-    "subject": "Business & Management",
-    "level": "All Levels",
-    "class_level": "All Levels",
-    "category": "Business & Management",
-    "language": "English",
-    "description": "Master the Art of Business — A world-class business education in a single volume covering value creation, marketing, sales, value delivery, finance, and the human mind.",
-    "file_format": "pdf",
-    "file_size_bytes": 3719644,
-    "page_count": 527,
-    "license": "Creative Commons (CC-BY)",
-    "storage_path": "/uploads/dd76898e-abd7-4792-8221-c54b7ae3ed27/1793856593522-the_personal_mba_josh_kaufman_10th_anniversary_edition_527_pages_compress.pdf",
-    "file_path": "/uploads/dd76898e-abd7-4792-8221-c54b7ae3ed27/1793856593522-the_personal_mba_josh_kaufman_10th_anniversary_edition_527_pages_compress.pdf",
-    "download_count": 14,
-    "rating_avg": 5,
-    "tags": [
-      "business",
-      "mba",
-      "management",
-      "strategy"
-    ],
-    "uploader_id": "dd76898e-abd7-4792-8221-c54b7ae3ed27",
-    "created_at": "2026-11-05T05:29:53.895Z"
   },
   {
     "id": "6a748b50-22b7-4bde-af5c-f4ff8d13be29",
@@ -61,18 +34,18 @@
     "file_format": "pdf",
     "file_size_bytes": 3719644,
     "page_count": 527,
-    "license": "Author Permission",
-    "storage_path": "/uploads/personal_mba.pdf",
-    "file_path": "/uploads/personal_mba.pdf",
+    "license": "Creative Commons (CC-BY)",
+    "storage_path": "/uploads/the_personal_mba_527_pages.pdf",
+    "file_path": "/uploads/the_personal_mba_527_pages.pdf",
     "download_count": 42,
-    "rating_avg": 4.9,
+    "rating_avg": 5.0,
     "tags": [
       "business",
       "management",
       "mba",
-      "leadership"
+      "strategy"
     ],
-    "uploader_id": null,
-    "created_at": "2026-11-05T05:23:13.144Z"
+    "uploader_id": "dd76898e-abd7-4792-8221-c54b7ae3ed27",
+    "created_at": "2026-11-05T05:29:53.895Z"
   }
 ]

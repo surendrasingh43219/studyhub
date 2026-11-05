@@ -1,8 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getLocalUploadedBooks } from '@/lib/books-store'
-import fs from 'fs'
-import path from 'path'
+
+export const runtime = 'edge'
 
 export async function GET(
   request: NextRequest,
@@ -45,38 +45,47 @@ export async function GET(
       return NextResponse.redirect(rawPath)
     }
 
-    let diskPath = ''
-
-    if (rawPath.startsWith('/uploads/') || rawPath.startsWith('uploads/')) {
-      const relative = rawPath.replace(/^\/?uploads\//, '')
-      diskPath = path.join(process.cwd(), 'public', 'uploads', relative)
-    } else if (path.isAbsolute(rawPath) && fs.existsSync(rawPath)) {
-      diskPath = rawPath
-    }
-
-    // Fallback search in public/uploads if not found
-    if (!diskPath || !fs.existsSync(diskPath)) {
-      const fallback = path.join(process.cwd(), 'public', 'uploads', 'the_personal_mba_527_pages.pdf')
-      if (fs.existsSync(fallback)) {
-        diskPath = fallback
+    try {
+      let fs: any = null
+      let path: any = null
+      if (typeof process !== 'undefined' && (process as any).release?.name === 'node') {
+        fs = (eval)('require')('fs')
+        path = (eval)('require')('path')
       }
-    }
+      let diskPath = ''
 
-    if (!diskPath || !fs.existsSync(diskPath)) {
-      return NextResponse.json({ error: 'PDF file not found on disk' }, { status: 404 })
-    }
+      if (fs && path) {
+        if (rawPath.startsWith('/uploads/') || rawPath.startsWith('uploads/')) {
+          const relative = rawPath.replace(/^\/?uploads\//, '')
+          diskPath = path.join(process.cwd(), 'public', 'uploads', relative)
+        } else if (path.isAbsolute(rawPath) && fs.existsSync(rawPath)) {
+          diskPath = rawPath
+        }
 
-    const buffer = fs.readFileSync(diskPath)
+        // Fallback search in public/uploads if not found
+        if (!diskPath || !fs.existsSync(diskPath)) {
+          const fallback = path.join(process.cwd(), 'public', 'uploads', 'the_personal_mba_527_pages.pdf')
+          if (fs.existsSync(fallback)) {
+            diskPath = fallback
+          }
+        }
 
-    return new NextResponse(buffer, {
-      status: 200,
-      headers: {
-        'Content-Type': 'application/pdf',
-        'Content-Length': String(buffer.length),
-        'Content-Disposition': `inline; filename="${encodeURIComponent(book.title)}.pdf"`,
-        'Cache-Control': 'public, max-age=86400',
-      },
-    })
+        if (diskPath && fs.existsSync(diskPath)) {
+          const buffer = fs.readFileSync(diskPath)
+          return new NextResponse(buffer, {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/pdf',
+              'Content-Length': String(buffer.length),
+              'Content-Disposition': `inline; filename="${encodeURIComponent(book.title)}.pdf"`,
+              'Cache-Control': 'public, max-age=86400',
+            },
+          })
+        }
+      }
+    } catch {}
+
+    return NextResponse.json({ error: 'PDF file not found' }, { status: 404 })
   } catch (err: any) {
     return NextResponse.json({ error: err.message || 'Stream error' }, { status: 500 })
   }

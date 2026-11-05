@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Navbar } from '@/components/layout/Navbar'
 
+export const runtime = 'edge'
+
 export default async function ProtectedLayout({
   children,
 }: {

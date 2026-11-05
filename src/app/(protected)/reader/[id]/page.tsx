@@ -4,6 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { BookReaderClient } from '@/components/reader/BookReaderClient'
 import { getLocalUploadedBooks } from '@/lib/books-store'
 
+export const runtime = 'edge'
+
 interface ReaderPageProps {
   params: Promise<{ id: string }>
   searchParams: Promise<{ page?: string }>

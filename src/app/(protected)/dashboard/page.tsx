@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { PersonalizedDashboard } from '@/components/dashboard/PersonalizedDashboard'
 import { redirect } from 'next/navigation'
 
+export const runtime = 'edge'
+
 export const metadata = {
   title: 'Dashboard | StudyHub',
   description: 'Your private personalized study dashboard.',

@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 
+export const runtime = 'edge'
+
 export const metadata = {
   title: 'Personalize Your Dashboard | StudyHub',
   description: 'Set up your personal study workspace.',
