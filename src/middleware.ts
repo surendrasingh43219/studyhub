@@ -14,8 +14,9 @@ export const config = {
      * - uploads (uploaded book documents)
      * - favicon.ico (favicon file)
      * - manifest.json / service worker files
+     * - robots.txt, sitemap.xml, google verification files
      * - images, pdf, epub assets
      */
-    '/((?!_next/static|_next/image|uploads|favicon.ico|manifest.json|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp|pdf|epub)$).*)',
+    '/((?!_next/static|_next/image|uploads|favicon.ico|manifest.json|sw.js|robots\\.txt|sitemap\\.xml|google[a-zA-Z0-9_-]+\\.html|.*\\.(?:svg|png|jpg|jpeg|gif|webp|pdf|epub|txt|xml|html)$).*)',
   ],
 }

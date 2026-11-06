@@ -6,6 +6,9 @@ export const metadata: Metadata = {
   description: 'Full-stack study platform with an open-source digital library, personal dashboards, and deep-focus study tools.',
   keywords: ['StudyHub', 'Digital Library', 'Study Platform', 'PDF Reader', 'Pomodoro Timer', 'Flashcards'],
   authors: [{ name: 'StudyHub Platform' }],
+  verification: {
+    google: '4c518c375c3a50f6',
+  },
 }
 
 export default function RootLayout({

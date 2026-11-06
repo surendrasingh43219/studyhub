@@ -57,6 +57,12 @@ export async function updateSession(request: NextRequest) {
     pathname === '/reset-password' ||
     pathname === '/terms' ||
     pathname === '/privacy' ||
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
+    pathname.startsWith('/google') ||
+    pathname.endsWith('.html') ||
+    pathname.endsWith('.txt') ||
+    pathname.endsWith('.xml') ||
     pathname.startsWith('/api/') ||
     pathname.startsWith('/uploads/') ||
     pathname.endsWith('.pdf') ||
