@@ -30,6 +30,13 @@ export function SignInForm() {
   const [lockoutTimer, setLockoutTimer] = useState(0)
 
   useEffect(() => {
+    const urlError = searchParams.get('error')
+    if (urlError) {
+      setServerError(decodeURIComponent(urlError))
+    }
+  }, [searchParams])
+
+  useEffect(() => {
     const savedAttempts = parseInt(localStorage.getItem('studyhub_failed_attempts') || '0', 10)
     const lockoutUntil = parseInt(localStorage.getItem('studyhub_lockout_until') || '0', 10)
     const now = Date.now()

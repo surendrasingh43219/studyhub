@@ -53,7 +53,7 @@ export default function LandingPage() {
               href="/signup"
               className="py-2 px-4 text-xs font-semibold text-white bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 rounded-xl shadow-md shadow-cyan-600/20 transition-all flex items-center gap-1.5"
             >
-              <span>Get Started</span>
+              <span>Sign Up Free</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
