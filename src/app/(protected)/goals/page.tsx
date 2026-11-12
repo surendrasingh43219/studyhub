@@ -1,6 +1,6 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { getCurrentUserOrLocal } from '@/lib/auth/session'
 import { GoalsClientView } from '@/components/goals/GoalsClientView'
+import { DEFAULT_GOALS } from '@/lib/data/defaultStudentData'
 
 export const runtime = 'edge'
 
@@ -14,12 +14,7 @@ export const metadata = {
 }
 
 export default async function GoalsPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/signin')
+  const { user, supabase } = await getCurrentUserOrLocal()
 
   const { data: goals } = await supabase
     .from('user_goals')
@@ -27,5 +22,7 @@ export default async function GoalsPage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  return <GoalsClientView initialGoals={goals || []} />
+  const loadedGoals = goals && goals.length > 0 ? goals : (DEFAULT_GOALS as any)
+
+  return <GoalsClientView initialGoals={loadedGoals} />
 }

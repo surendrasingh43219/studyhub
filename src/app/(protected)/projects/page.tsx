@@ -1,5 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { getCurrentUserOrLocal } from '@/lib/auth/session'
 import { ProjectsClientView } from '@/components/projects/ProjectsClientView'
 
 export const runtime = 'edge'
@@ -14,12 +13,7 @@ export const metadata = {
 }
 
 export default async function ProjectsPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/signin')
+  const { user, supabase } = await getCurrentUserOrLocal()
 
   let projects: any[] = []
   try {

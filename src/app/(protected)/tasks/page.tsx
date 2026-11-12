@@ -1,6 +1,6 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { getCurrentUserOrLocal } from '@/lib/auth/session'
 import { TasksClientView } from '@/components/tasks/TasksClientView'
+import { DEFAULT_TASKS } from '@/lib/data/defaultStudentData'
 
 export const runtime = 'edge'
 
@@ -14,12 +14,7 @@ export const metadata = {
 }
 
 export default async function TasksPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/signin')
+  const { user, supabase } = await getCurrentUserOrLocal()
 
   const { data: tasks } = await supabase
     .from('tasks')
@@ -27,5 +22,7 @@ export default async function TasksPage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  return <TasksClientView initialTasks={tasks || []} />
+  const loadedTasks = tasks && tasks.length > 0 ? tasks : (DEFAULT_TASKS as any)
+
+  return <TasksClientView initialTasks={loadedTasks} />
 }

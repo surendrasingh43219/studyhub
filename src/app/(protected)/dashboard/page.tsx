@@ -1,13 +1,13 @@
-import { cookies } from 'next/headers'
-import { createClient } from '@/lib/supabase/server'
-import { PersonalizedDashboard } from '@/components/dashboard/PersonalizedDashboard'
+import { getCurrentUserOrLocal } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
+import { PersonalizedDashboard } from '@/components/dashboard/PersonalizedDashboard'
+import { DEFAULT_TASKS, DEFAULT_EXAMS, DEFAULT_GOALS } from '@/lib/data/defaultStudentData'
 
 export const runtime = 'edge'
 
 export const metadata = {
-  title: 'Dashboard | StudyHub Pro',
-  description: 'Your private personalized study dashboard.',
+  title: 'Dashboard | StudyHub',
+  description: 'Your personal student command center.',
   robots: {
     index: false,
     follow: false,
@@ -15,15 +15,7 @@ export const metadata = {
 }
 
 export default async function DashboardPage() {
-  const supabase = await createClient()
-  let user: any = null
-
-  try {
-    const { data: { user: authUser } } = await supabase.auth.getUser()
-    user = authUser
-  } catch {}
-
-  if (!user) redirect('/signin')
+  const { user, supabase } = await getCurrentUserOrLocal()
 
   // ── Check if onboarding is complete ──────────────────────────────────────
   const { data: onboardingProfile } = await supabase
@@ -104,10 +96,10 @@ export default async function DashboardPage() {
       }}
       continueReading={continueReading}
       widgetsConfig={widgetConfig?.widgets_config || []}
-      initialTasks={tasks || []}
-      initialExams={exams || []}
+      initialTasks={tasks && tasks.length > 0 ? tasks : (DEFAULT_TASKS as any)}
+      initialExams={exams && exams.length > 0 ? exams : (DEFAULT_EXAMS as any)}
       initialSubjects={subjects || []}
-      initialGoals={goals || []}
+      initialGoals={goals && goals.length > 0 ? goals : (DEFAULT_GOALS as any)}
       onboardingProfile={onboardingProfile}
       badges={badges}
     />

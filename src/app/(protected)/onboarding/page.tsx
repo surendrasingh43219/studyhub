@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUserOrLocal } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
 import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard'
 
@@ -10,19 +10,18 @@ export const metadata = {
 }
 
 export default async function OnboardingPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/signin')
+  const { user, supabase } = await getCurrentUserOrLocal()
 
   // Check if already completed
-  const { data: onboardingProfile } = await supabase
-    .from('onboarding_profiles')
-    .select('*')
-    .eq('user_id', user.id)
-    .single()
+  let onboardingProfile: any = null
+  try {
+    const { data } = await supabase
+      .from('onboarding_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single()
+    onboardingProfile = data
+  } catch {}
 
   if (onboardingProfile?.onboarding_complete) {
     redirect('/dashboard')

@@ -1,6 +1,6 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { getCurrentUserOrLocal } from '@/lib/auth/session'
 import { ExamsClientView } from '@/components/exams/ExamsClientView'
+import { DEFAULT_EXAMS } from '@/lib/data/defaultStudentData'
 
 export const runtime = 'edge'
 
@@ -14,12 +14,7 @@ export const metadata = {
 }
 
 export default async function ExamsPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/signin')
+  const { user, supabase } = await getCurrentUserOrLocal()
 
   const [{ data: exams }] = await Promise.all([
     supabase
@@ -43,9 +38,11 @@ export default async function ExamsPage() {
     if (mocksData) mockScores = mocksData
   } catch {}
 
+  const loadedExams = exams && exams.length > 0 ? exams : (DEFAULT_EXAMS as any)
+
   return (
     <ExamsClientView
-      initialExams={exams || []}
+      initialExams={loadedExams}
       initialTopics={topics}
       initialMockScores={mockScores}
     />

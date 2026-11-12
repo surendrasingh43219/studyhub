@@ -72,7 +72,7 @@ export default async function ReaderPage({
   // If the book is not public/approved, user must be the authenticated uploader
   if (!bookData.is_public || !bookData.is_approved) {
     if (!user || user.id !== bookData.uploader_id) {
-      redirect('/signin')
+      redirect('/library')
     }
   }
 

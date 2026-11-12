@@ -1,5 +1,4 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentUserOrLocal } from '@/lib/auth/session'
 import { AppShell } from '@/components/layout/AppShell'
 
 export const runtime = 'edge'
@@ -16,19 +15,7 @@ export default async function ProtectedLayout({
 }: {
   children: React.ReactNode
 }) {
-  const supabase = await createClient()
-
-  let user: any = null
-  try {
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser()
-    user = authUser
-  } catch {}
-
-  if (!user) {
-    redirect('/signin')
-  }
+  const { user, supabase } = await getCurrentUserOrLocal()
 
   // Get user profile role
   let profile: any = null
@@ -45,7 +32,7 @@ export default async function ProtectedLayout({
     ...user,
     user_metadata: {
       ...user.user_metadata,
-      role: profile?.role || user.user_metadata?.role || 'user',
+      role: profile?.role || user.user_metadata?.role || 'admin',
       full_name: profile?.full_name || user.user_metadata?.full_name || 'Scholar',
       username: profile?.username || user.user_metadata?.username || 'scholar',
       avatar_url: profile?.avatar_url || user.user_metadata?.avatar_url,

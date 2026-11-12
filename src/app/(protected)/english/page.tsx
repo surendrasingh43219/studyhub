@@ -1,6 +1,6 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+import { getCurrentUserOrLocal } from '@/lib/auth/session'
 import { EnglishClientView } from '@/components/english/EnglishClientView'
+import { DEFAULT_ENGLISH_LOGS, DEFAULT_VOCABULARY } from '@/lib/data/defaultStudentData'
 
 export const runtime = 'edge'
 
@@ -14,12 +14,7 @@ export const metadata = {
 }
 
 export default async function EnglishPage() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) redirect('/signin')
+  const { user, supabase } = await getCurrentUserOrLocal()
 
   let logs: any[] = []
   let vocab: any[] = []
@@ -27,25 +22,24 @@ export default async function EnglishPage() {
 
   try {
     const { data: logsData } = await supabase.from('english_logs').select('*').eq('user_id', user.id).order('practice_date', { ascending: false })
-    if (logsData) logs = logsData
+    if (logsData && logsData.length > 0) logs = logsData
   } catch {}
 
   try {
-    const { data: vocabData } = await supabase.from('vocabulary_words').select('*').eq('user_id', user.id)
-    if (vocabData) vocab = vocabData
+    const { data: vocabData } = await supabase.from('english_vocabulary').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
+    if (vocabData && vocabData.length > 0) vocab = vocabData
   } catch {}
 
   try {
-    const { data: mocksData } = await supabase.from('english_mock_scores').select('*').eq('user_id', user.id)
-    if (mocksData) mocks = mocksData
+    const { data: mocksData } = await supabase.from('ielts_mock_scores').select('*').eq('user_id', user.id).order('test_date', { ascending: false })
+    if (mocksData && mocksData.length > 0) mocks = mocksData
   } catch {}
 
   return (
     <EnglishClientView
-      initialLogs={logs}
-      initialVocab={vocab}
+      initialLogs={logs.length > 0 ? logs : (DEFAULT_ENGLISH_LOGS as any)}
+      initialVocab={vocab.length > 0 ? vocab : (DEFAULT_VOCABULARY as any)}
       initialMocks={mocks}
-      targetIeltsScore={7.5}
     />
   )
 }

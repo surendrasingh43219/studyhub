@@ -44,16 +44,10 @@ export default function LandingPage() {
 
           <div className="flex items-center gap-3">
             <Link
-              href="/signin"
-              className="py-2 px-3.5 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl transition-all"
+              href="/dashboard"
+              className="py-2 px-4 text-xs font-semibold text-white bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 active:from-cyan-700 active:to-blue-700 rounded-xl shadow-md shadow-cyan-600/20 transition-all flex items-center gap-1.5"
             >
-              Sign In
-            </Link>
-            <Link
-              href="/signup"
-              className="py-2 px-4 text-xs font-semibold text-white bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 rounded-xl shadow-md shadow-cyan-600/20 transition-all flex items-center gap-1.5"
-            >
-              <span>Sign Up Free</span>
+              <span>Open Dashboard</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -81,10 +75,10 @@ export default function LandingPage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-4">
               <Link
-                href="/signup"
+                href="/dashboard"
                 className="w-full sm:w-auto py-3.5 px-7 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-xl text-sm shadow-lg shadow-cyan-600/25 transition-all flex items-center justify-center gap-2"
               >
-                <span>Build Your Personal StudyHub</span>
+                <span>Enter Personal Command Center</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
@@ -258,10 +252,10 @@ export default function LandingPage() {
             </p>
             <div className="pt-4">
               <Link
-                href="/signup"
+                href="/dashboard"
                 className="inline-flex items-center gap-2 py-3 px-6 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs rounded-xl shadow-md transition-all"
               >
-                <span>Join StudyHub Today</span>
+                <span>Open Dashboard</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
