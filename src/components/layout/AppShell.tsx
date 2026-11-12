@@ -115,52 +115,181 @@ export function AppShell({ user, children }: AppShellProps) {
                 )}
               </div>
 
-              {/* Navigation Links */}
-              <nav className="space-y-1.5 text-sm">
+              {/* Navigation Links in Mobile Drawer */}
+              <nav className="space-y-1 text-xs sm:text-sm overflow-y-auto max-h-[calc(100vh-220px)] pr-1">
                 <Link
-                  href="/profile"
+                  href="/dashboard"
                   onClick={() => setMobileDrawerOpen(false)}
-                  className={`flex items-center justify-between p-3 rounded-xl transition-all ${
-                    pathname === '/profile'
+                  className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
+                    pathname === '/dashboard'
                       ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
                       : 'text-slate-300 hover:bg-slate-800/60'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <User className="w-4 h-4 text-cyan-400" />
-                    <span>My Profile</span>
+                  <span>Overview</span>
+                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                </Link>
+
+                <Link
+                  href="/tasks"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
+                    pathname === '/tasks'
+                      ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <span>My Tasks</span>
+                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                </Link>
+
+                <Link
+                  href="/tracker"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
+                    pathname === '/tracker'
+                      ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <span>Study Tracker</span>
+                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                </Link>
+
+                <Link
+                  href="/library"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
+                    pathname === '/library'
+                      ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>Book Library</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-slate-500" />
                 </Link>
 
                 <Link
+                  href="/exams"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
+                    pathname === '/exams'
+                      ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <span>Exam Preparation</span>
+                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                </Link>
+
+                <Link
+                  href="/calendar"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
+                    pathname === '/calendar'
+                      ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <span>Calendar</span>
+                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                </Link>
+
+                <Link
+                  href="/skills"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
+                    pathname === '/skills'
+                      ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <span>My Skills</span>
+                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                </Link>
+
+                <Link
+                  href="/projects"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
+                    pathname === '/projects'
+                      ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <span>Projects</span>
+                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                </Link>
+
+                <Link
+                  href="/english"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
+                    pathname === '/english'
+                      ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <span>English Practice</span>
+                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                </Link>
+
+                <Link
+                  href="/notes"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
+                    pathname === '/notes'
+                      ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <span>My Notes</span>
+                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                </Link>
+
+                <Link
+                  href="/goals"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
+                    pathname === '/goals'
+                      ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <span>Goals & Habits</span>
+                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                </Link>
+
+                <Link
+                  href="/analytics"
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
+                    pathname === '/analytics'
+                      ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
+                      : 'text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  <span>Analytics</span>
+                  <ChevronRight className="w-4 h-4 text-slate-500" />
+                </Link>
+
+                <div className="pt-2 border-t border-slate-800/60 my-2" />
+
+                <Link
                   href="/settings"
                   onClick={() => setMobileDrawerOpen(false)}
-                  className={`flex items-center justify-between p-3 rounded-xl transition-all ${
+                  className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
                     pathname === '/settings'
                       ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
                       : 'text-slate-300 hover:bg-slate-800/60'
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <Settings className="w-4 h-4 text-slate-400" />
-                    <span>Settings & GDPR</span>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-500" />
-                </Link>
-
-                <Link
-                  href="/library/upload"
-                  onClick={() => setMobileDrawerOpen(false)}
-                  className={`flex items-center justify-between p-3 rounded-xl transition-all ${
-                    pathname === '/library/upload'
-                      ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
-                      : 'text-slate-300 hover:bg-slate-800/60'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <BookOpen className="w-4 h-4 text-emerald-400" />
-                    <span>Upload Book</span>
+                    <span>Settings & Devices</span>
                   </div>
                   <ChevronRight className="w-4 h-4 text-slate-500" />
                 </Link>
@@ -169,30 +298,19 @@ export function AppShell({ user, children }: AppShellProps) {
                   <Link
                     href="/admin"
                     onClick={() => setMobileDrawerOpen(false)}
-                    className={`flex items-center justify-between p-3 rounded-xl transition-all ${
+                    className={`flex items-center justify-between p-2.5 rounded-xl transition-all ${
                       pathname === '/admin'
                         ? 'bg-cyan-500/15 text-cyan-400 font-semibold'
                         : 'text-slate-300 hover:bg-slate-800/60'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2">
                       <Shield className="w-4 h-4 text-amber-400" />
                       <span>Admin Moderation</span>
                     </div>
                     <ChevronRight className="w-4 h-4 text-slate-500" />
                   </Link>
                 )}
-
-                <div className="pt-2 border-t border-slate-800/60 my-2" />
-
-                <Link
-                  href="/guides"
-                  onClick={() => setMobileDrawerOpen(false)}
-                  className="flex items-center justify-between p-3 rounded-xl text-slate-300 hover:bg-slate-800/60 transition-all text-xs"
-                >
-                  <span>Study Planning Guides</span>
-                  <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
-                </Link>
               </nav>
             </div>
 

@@ -4,9 +4,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard,
-  BookOpen,
+  CheckSquare,
   Timer,
-  StickyNote,
+  BookOpen,
   Menu,
 } from 'lucide-react'
 
@@ -19,10 +19,10 @@ export function BottomNav({ onOpenMenu, userRole }: BottomNavProps) {
   const pathname = usePathname()
 
   const tabs = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Tasks', href: '/tasks', icon: CheckSquare },
+    { name: 'Tracker', href: '/tracker', icon: Timer },
     { name: 'Library', href: '/library', icon: BookOpen },
-    { name: 'Tools', href: '/tools', icon: Timer },
-    { name: 'Notes', href: '/notes', icon: StickyNote },
   ]
 
   return (

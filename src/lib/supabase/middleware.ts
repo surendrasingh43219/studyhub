@@ -44,6 +44,15 @@ export async function updateSession(request: NextRequest) {
   // Gated private routes that STRICTLY require authentication
   const isExplicitlyProtected =
     pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/tasks') ||
+    pathname.startsWith('/tracker') ||
+    pathname.startsWith('/exams') ||
+    pathname.startsWith('/calendar') ||
+    pathname.startsWith('/skills') ||
+    pathname.startsWith('/projects') ||
+    pathname.startsWith('/english') ||
+    pathname.startsWith('/goals') ||
+    pathname.startsWith('/analytics') ||
     pathname.startsWith('/profile') ||
     pathname.startsWith('/settings') ||
     pathname.startsWith('/notes') ||

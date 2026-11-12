@@ -16,6 +16,15 @@ const assert = require('assert')
 function simulateMiddleware(pathname, user = null, search = '') {
   const isExplicitlyProtected =
     pathname.startsWith('/dashboard') ||
+    pathname.startsWith('/tasks') ||
+    pathname.startsWith('/tracker') ||
+    pathname.startsWith('/exams') ||
+    pathname.startsWith('/calendar') ||
+    pathname.startsWith('/skills') ||
+    pathname.startsWith('/projects') ||
+    pathname.startsWith('/english') ||
+    pathname.startsWith('/goals') ||
+    pathname.startsWith('/analytics') ||
     pathname.startsWith('/profile') ||
     pathname.startsWith('/settings') ||
     pathname.startsWith('/notes') ||
@@ -121,6 +130,15 @@ publicRoutes.forEach((route) => {
 // Suite 2: Protected Routes MUST Redirect unauthenticated users
 const protectedRoutes = [
   '/dashboard',
+  '/tasks',
+  '/tracker',
+  '/exams',
+  '/calendar',
+  '/skills',
+  '/projects',
+  '/english',
+  '/goals',
+  '/analytics',
   '/library/upload',
   '/tools',
   '/notes',

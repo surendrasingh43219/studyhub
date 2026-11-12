@@ -3,22 +3,25 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
+  Sparkles,
+  User,
   GraduationCap,
-  BookOpen,
   Target,
+  BookOpen,
+  Clock,
   LayoutDashboard,
-  Palette,
   CheckCircle2,
   ArrowRight,
   ArrowLeft,
   Plus,
   X,
   Loader2,
-  Sparkles,
-  Brain,
-  Clock,
+  Shield,
+  Layers,
   Calendar,
-  Star,
+  CheckSquare,
+  Briefcase,
+  Languages,
 } from 'lucide-react'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -27,16 +30,23 @@ interface OnboardingData {
   avatar_emoji: string
   bio: string
   education_type: string
-  career_interests: string[]
   current_institution: string
-  current_year: string
+  course_degree: string
+  branch_stream: string
+  semester_class: string
+  preferred_language: string
+  career_interests: string[]
+  goals: string[]
+  subjects: Array<{ name: string; category: string; icon_emoji: string; color: string }>
   daily_study_goal_hours: number
+  wake_up_time: string
   preferred_study_time: string
+  break_time: string
+  working_hours: string
+  weekly_target_hours: number
   selected_widgets: string[]
   theme: string
   accent_color: string
-  exams: Array<{ name: string; subject: string; exam_date: string; color: string }>
-  subjects: Array<{ name: string; category: string; icon_emoji: string; color: string }>
 }
 
 interface Props {
@@ -48,71 +58,56 @@ interface Props {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const STEPS = [
-  { id: 1, title: 'Your Profile',      icon: GraduationCap, desc: 'Tell us about yourself' },
-  { id: 2, title: 'Education & Goals', icon: Brain,          desc: 'What are you studying?' },
-  { id: 3, title: 'Exams & Targets',   icon: Calendar,       desc: 'Add your upcoming exams' },
-  { id: 4, title: 'Subjects & Skills', icon: BookOpen,       desc: 'What topics are you learning?' },
-  { id: 5, title: 'Dashboard Layout',  icon: LayoutDashboard,desc: 'Pick your widgets' },
-  { id: 6, title: 'Appearance',        icon: Palette,        desc: 'Choose your theme' },
+  { id: 1, title: 'Welcome',          icon: Sparkles,        desc: 'Build your system' },
+  { id: 2, title: 'Basic Profile',    icon: User,            desc: 'Academic details' },
+  { id: 3, title: 'Personal Goals',   icon: Target,          desc: 'What you want to achieve' },
+  { id: 4, title: 'Subjects & Areas', icon: BookOpen,        desc: 'What you are studying' },
+  { id: 5, title: 'Daily Routine',    icon: Clock,           desc: 'Targets & schedule' },
+  { id: 6, title: 'Dashboard Setup',  icon: LayoutDashboard, desc: 'Choose your widgets' },
+  { id: 7, title: 'Finish',           icon: CheckCircle2,    desc: 'Ready to launch' },
 ]
 
-const EDUCATION_TYPES = [
-  { value: 'school',           label: 'School Student',       emoji: '🏫' },
-  { value: 'college',          label: 'College / University', emoji: '🎓' },
-  { value: 'competitive_exam', label: 'Competitive Exams',    emoji: '📋' },
-  { value: 'professional',     label: 'Working Professional', emoji: '💼' },
-  { value: 'self_learner',     label: 'Self Learner',         emoji: '🧠' },
-  { value: 'other',            label: 'Other',                emoji: '✨' },
+const EDUCATION_LEVELS = [
+  { value: 'school',           label: 'School Student (Grades 9-12)', emoji: '🏫' },
+  { value: 'college',          label: 'College / University',         emoji: '🎓' },
+  { value: 'competitive_exam', label: 'Competitive Exams (UPSC/PCS/SSC)', emoji: '📋' },
+  { value: 'professional',     label: 'Working Professional',         emoji: '💼' },
+  { value: 'self_learner',     label: 'Adult Learner / Self-Study',   emoji: '🧠' },
 ]
 
-const CAREER_INTERESTS_OPTIONS = [
-  'Data Science', 'Web Development', 'Civil Services (UPSC)', 'State PCS (Rajasthan / UP / MP)',
-  'Defence (Agniveer / NDA)', 'SSC / Banking', 'IELTS / TOEFL', 'JEE / NEET',
-  'CA / Finance', 'Law / CLAT', 'Design / UX', 'Machine Learning / AI',
-  'Cybersecurity', 'Cloud / DevOps', 'Business / MBA', 'Teaching / BEd',
-  'Medical / MBBS', 'Programming', 'Digital Marketing', 'Other',
+const PRESET_GOALS = [
+  'Complete graduation with top grade',
+  'Prepare for competitive exams (UPSC/PCS/SSC)',
+  'Become a Data Analyst',
+  'Improve spoken English & communication',
+  'Learn Python & SQL programming',
+  'Get an internship or job offer',
+  'Prepare for IELTS / TOEFL score',
+  'Build professional portfolio projects',
+  'Maintain daily study consistency',
 ]
-
-const EXAM_COLORS = ['rose', 'orange', 'amber', 'cyan', 'blue', 'violet', 'emerald', 'pink']
-
-const SUBJECT_CATEGORIES = ['Subject', 'Skill', 'Language', 'Chapter', 'Module', 'Topic']
-
-const SUBJECT_ICONS = ['📚', '💻', '🧮', '🌍', '⚡', '🔬', '📐', '🎵', '🏛️', '💰', '📊', '🔧']
 
 const ALL_WIDGETS = [
-  { key: 'stats',    label: 'Study Stats',      icon: '📊', desc: 'Focus time, streak, notes count' },
-  { key: 'tasks',    label: 'Daily Tasks',       icon: '✅', desc: 'Your personal to-do list' },
-  { key: 'exams',    label: 'Exam Countdown',    icon: '📅', desc: 'Days remaining to your exams' },
-  { key: 'subjects', label: 'My Subjects',       icon: '📚', desc: 'Track subject progress' },
-  { key: 'reading',  label: 'Continue Reading',  icon: '📖', desc: 'Resume your current book' },
-  { key: 'goals',    label: 'Daily Goals',       icon: '🎯', desc: 'Set and track daily targets' },
-  { key: 'skills',   label: 'Skills Progress',   icon: '⚡', desc: 'Track skill completion %' },
-  { key: 'projects', label: 'Projects',          icon: '🗂️', desc: 'Monitor your study projects' },
-  { key: 'calendar', label: 'Study Calendar',    icon: '🗓️', desc: 'Upcoming events & reminders' },
-  { key: 'badges',   label: 'Achievements',      icon: '🏆', desc: 'Unlock badges as you study' },
+  { key: 'stats',    label: 'Study Stats',       icon: '📊', desc: 'Focus hours, streak, tasks completed' },
+  { key: 'tasks',    label: 'Daily Tasks',        icon: '✅', desc: 'Interactive tick/untick to-do list' },
+  { key: 'exams',    label: 'Exam Countdown',     icon: '📅', desc: 'Days remaining & syllabus progress' },
+  { key: 'subjects', label: 'My Subjects',        icon: '📚', desc: 'Subject-wise learning targets' },
+  { key: 'reading',  label: 'Book Library',       icon: '📖', desc: 'Digital textbook bookmarks & reader' },
+  { key: 'goals',    label: 'Personal Goals',     icon: '🎯', desc: 'Long-term goals & daily habits' },
+  { key: 'skills',   label: 'Skills Progress',    icon: '⚡', desc: 'Technical & professional skill levels' },
+  { key: 'projects', label: 'Projects',           icon: '🗂️', desc: 'Milestones & GitHub progress' },
+  { key: 'calendar', label: 'Calendar',           icon: '🗓️', desc: 'Exams, deadlines & study blocks' },
 ]
 
-const THEMES = [
-  { value: 'dark',   label: 'Dark Mode',   preview: 'bg-slate-900 border-slate-700' },
-  { value: 'light',  label: 'Light Mode',  preview: 'bg-white border-slate-200' },
-  { value: 'system', label: 'System',      preview: 'bg-gradient-to-r from-slate-900 to-white border-slate-500' },
-]
+const AVATAR_EMOJIS = ['🎓', '🧑‍💻', '👩‍🔬', '👨‍💼', '🧑‍🎨', '👩‍⚕️', '🧑‍🏫', '👨‍🚀', '⚡', '🎯', '🌟', '🚀']
 
-const ACCENT_COLORS = [
-  { value: 'cyan',   className: 'bg-cyan-500' },
-  { value: 'blue',   className: 'bg-blue-500' },
-  { value: 'violet', className: 'bg-violet-500' },
-  { value: 'emerald',className: 'bg-emerald-500' },
-  { value: 'rose',   className: 'bg-rose-500' },
-  { value: 'amber',  className: 'bg-amber-500' },
-]
-
-const AVATAR_EMOJIS = ['🎓', '🧑‍💻', '👩‍🔬', '👨‍💼', '🧑‍🎨', '👩‍⚕️', '🧑‍🏫', '👨‍🚀', '🦸', '🧙', '🌟', '🚀']
+const SUBJECT_ICONS = ['📚', '💻', '🧮', '🌍', '⚡', '🔬', '📐', '🎵', '🏛️', '💰', '📊', '🔧']
+const SUBJECT_COLORS = ['cyan', 'blue', 'violet', 'emerald', 'rose', 'amber']
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export function OnboardingWizard({ userId, userEmail, initialName, existingProfile }: Props) {
   const router = useRouter()
-  const [currentStep, setCurrentStep] = useState(existingProfile?.onboarding_step || 1)
+  const [currentStep, setCurrentStep] = useState(1)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -120,25 +115,89 @@ export function OnboardingWizard({ userId, userEmail, initialName, existingProfi
     display_name: existingProfile?.display_name || initialName,
     avatar_emoji: existingProfile?.avatar_emoji || '🎓',
     bio: existingProfile?.bio || '',
-    education_type: existingProfile?.education_type || '',
-    career_interests: existingProfile?.career_interests || [],
+    education_type: existingProfile?.education_type || 'college',
     current_institution: existingProfile?.current_institution || '',
-    current_year: existingProfile?.current_year || '',
-    daily_study_goal_hours: existingProfile?.daily_study_goal_hours || 2,
+    course_degree: existingProfile?.course_degree || '',
+    branch_stream: existingProfile?.branch_stream || '',
+    semester_class: existingProfile?.semester_class || '',
+    preferred_language: existingProfile?.preferred_language || 'English',
+    career_interests: existingProfile?.career_interests || [],
+    goals: [
+      'Complete graduation with top grade',
+      'Become a Data Analyst',
+      'Improve spoken English & communication',
+    ],
+    subjects: [
+      { name: 'Mathematics', category: 'Subject', icon_emoji: '🧮', color: 'blue' },
+      { name: 'Computer Science', category: 'Subject', icon_emoji: '💻', color: 'cyan' },
+      { name: 'English Communication', category: 'Language', icon_emoji: '🌍', color: 'emerald' },
+    ],
+    daily_study_goal_hours: existingProfile?.daily_study_goal_hours || 4,
+    wake_up_time: existingProfile?.wake_up_time || '06:30 AM',
     preferred_study_time: existingProfile?.preferred_study_time || 'evening',
-    selected_widgets: existingProfile?.selected_widgets || ['stats','tasks','exams','subjects','reading','goals','badges'],
+    break_time: existingProfile?.break_time || '10 mins every hour',
+    working_hours: existingProfile?.working_hours || '4 - 6 hours',
+    weekly_target_hours: existingProfile?.weekly_target_hours || 24,
+    selected_widgets: existingProfile?.selected_widgets || ['stats', 'tasks', 'exams', 'subjects', 'reading', 'goals'],
     theme: existingProfile?.theme || 'dark',
     accent_color: existingProfile?.accent_color || 'cyan',
-    exams: [],
-    subjects: [],
   })
 
-  // Exam management
-  const [newExam, setNewExam] = useState({ name: '', subject: '', exam_date: '', color: 'rose' })
-  // Subject management
-  const [newSubject, setNewSubject] = useState({ name: '', category: 'Subject', icon_emoji: '📚', color: 'blue' })
+  // Quick inputs
+  const [customGoal, setCustomGoal] = useState('')
+  const [newSubName, setNewSubName] = useState('')
+  const [newSubCategory, setNewSubCategory] = useState('Subject')
+  const [newSubEmoji, setNewSubEmoji] = useState('📚')
+  const [newSubColor, setNewSubColor] = useState('cyan')
 
-  const saveProgress = async (complete = false) => {
+  const toggleGoal = (goal: string) => {
+    setData((p) => ({
+      ...p,
+      goals: p.goals.includes(goal)
+        ? p.goals.filter((g) => g !== goal)
+        : [...p.goals, goal],
+    }))
+  }
+
+  const addCustomGoal = () => {
+    if (!customGoal.trim()) return
+    if (!data.goals.includes(customGoal.trim())) {
+      setData((p) => ({ ...p, goals: [...p.goals, customGoal.trim()] }))
+    }
+    setCustomGoal('')
+  }
+
+  const addSubject = () => {
+    if (!newSubName.trim()) return
+    setData((p) => ({
+      ...p,
+      subjects: [
+        ...p.subjects,
+        {
+          name: newSubName.trim(),
+          category: newSubCategory,
+          icon_emoji: newSubEmoji,
+          color: newSubColor,
+        },
+      ],
+    }))
+    setNewSubName('')
+  }
+
+  const removeSubject = (idx: number) => {
+    setData((p) => ({ ...p, subjects: p.subjects.filter((_, i) => i !== idx) }))
+  }
+
+  const toggleWidget = (key: string) => {
+    setData((p) => ({
+      ...p,
+      selected_widgets: p.selected_widgets.includes(key)
+        ? p.selected_widgets.filter((w) => w !== key)
+        : [...p.selected_widgets, key],
+    }))
+  }
+
+  const saveOnboarding = async (isComplete = false) => {
     setSaving(true)
     setError(null)
     try {
@@ -147,515 +206,517 @@ export function OnboardingWizard({ userId, userEmail, initialName, existingProfi
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...data,
-          onboarding_step: complete ? 6 : currentStep,
-          onboarding_complete: complete,
+          onboarding_step: currentStep,
+          onboarding_complete: isComplete,
         }),
       })
+
       if (!res.ok) {
-        const j = await res.json()
-        throw new Error(j.error || 'Failed to save')
+        const err = await res.json()
+        throw new Error(err.error || 'Failed to save setup')
       }
-    } catch (e: any) {
-      setError(e.message)
+
+      if (isComplete) {
+        router.push('/dashboard')
+        router.refresh()
+      }
+    } catch (err: any) {
+      setError(err.message || 'Error saving setup')
     } finally {
       setSaving(false)
     }
   }
 
-  const handleNext = async () => {
-    await saveProgress(false)
-    if (currentStep < STEPS.length) setCurrentStep(currentStep + 1)
+  const handleNext = () => {
+    if (currentStep < 7) {
+      setCurrentStep((p) => p + 1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } else {
+      saveOnboarding(true)
+    }
   }
 
   const handleBack = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1)
-  }
-
-  const handleComplete = async () => {
-    await saveProgress(true)
-    router.push('/dashboard')
-    router.refresh()
-  }
-
-  const handleSkip = async () => {
-    setSaving(true)
-    try {
-      await fetch('/api/onboarding', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...data,
-          onboarding_step: 6,
-          onboarding_complete: true,
-        }),
-      })
-    } finally {
-      setSaving(false)
-      router.push('/dashboard')
-      router.refresh()
+    if (currentStep > 1) {
+      setCurrentStep((p) => p - 1)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }
 
-  const toggleCareerInterest = (interest: string) => {
-    setData(prev => ({
-      ...prev,
-      career_interests: prev.career_interests.includes(interest)
-        ? prev.career_interests.filter(i => i !== interest)
-        : [...prev.career_interests, interest],
-    }))
+  const handleSkip = () => {
+    saveOnboarding(true)
   }
 
-  const toggleWidget = (key: string) => {
-    setData(prev => ({
-      ...prev,
-      selected_widgets: prev.selected_widgets.includes(key)
-        ? prev.selected_widgets.filter(w => w !== key)
-        : [...prev.selected_widgets, key],
-    }))
-  }
-
-  const addExam = () => {
-    if (!newExam.name.trim()) return
-    setData(prev => ({ ...prev, exams: [...prev.exams, { ...newExam }] }))
-    setNewExam({ name: '', subject: '', exam_date: '', color: 'rose' })
-  }
-
-  const removeExam = (idx: number) => {
-    setData(prev => ({ ...prev, exams: prev.exams.filter((_, i) => i !== idx) }))
-  }
-
-  const addSubject = () => {
-    if (!newSubject.name.trim()) return
-    setData(prev => ({ ...prev, subjects: [...prev.subjects, { ...newSubject }] }))
-    setNewSubject({ name: '', category: 'Subject', icon_emoji: '📚', color: 'blue' })
-  }
-
-  const removeSubject = (idx: number) => {
-    setData(prev => ({ ...prev, subjects: prev.subjects.filter((_, i) => i !== idx) }))
-  }
-
-  // ─── Render step content ────────────────────────────────────────────────────
+  // ─── Step Renderers ────────────────────────────────────────────────────────
   const renderStep = () => {
     switch (currentStep) {
-      // ── STEP 1: Profile ──────────────────────────────────────────────────────
+      // ── STEP 1: Welcome ──
       case 1:
         return (
-          <div className="space-y-6">
+          <div className="space-y-6 text-center py-4">
+            <div className="w-16 h-16 rounded-3xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mx-auto text-cyan-400 shadow-xl shadow-cyan-500/10">
+              <Sparkles className="w-8 h-8" />
+            </div>
+
+            <div className="space-y-2">
+              <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+                Welcome to <span className="text-cyan-400">StudyHub</span>!
+              </h1>
+              <p className="text-base sm:text-lg text-slate-300 font-medium">
+                Let's build your personal success system.
+              </p>
+              <p className="text-xs sm:text-sm text-slate-400 max-w-lg mx-auto leading-relaxed">
+                StudyHub is your private student command center. We help you organize daily study routines, track exams, master skills, and achieve ambitious goals—with 100% privacy and zero paywalls.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left pt-2">
+              <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-1">
+                <div className="text-cyan-400 font-semibold text-xs flex items-center gap-1.5">
+                  <Shield className="w-4 h-4" /> 100% Private
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Every note, task, and syllabus record belongs exclusively to you.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-1">
+                <div className="text-emerald-400 font-semibold text-xs flex items-center gap-1.5">
+                  <CheckSquare className="w-4 h-4" /> Free Forever
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Unlimited tasks, calendar views, and habit tracking without subscriptions.
+                </p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-1">
+                <div className="text-purple-400 font-semibold text-xs flex items-center gap-1.5">
+                  <Layers className="w-4 h-4" /> Multi-Device
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Access seamlessly from mobile, tablet, or desktop with real-time sync.
+                </p>
+              </div>
+            </div>
+          </div>
+        )
+
+      // ── STEP 2: Basic Profile ──
+      case 2:
+        return (
+          <div className="space-y-5">
             <div>
-              <label className="block text-xs font-medium text-slate-300 mb-2">Choose Your Avatar</label>
+              <h2 className="text-lg font-bold text-white">Academic & Student Profile</h2>
+              <p className="text-xs text-slate-400">Customize how your dashboard addresses and organizes your learning.</p>
+            </div>
+
+            {/* Avatar & Display Name */}
+            <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-3">
+              <label className="block text-xs font-semibold text-slate-300">Choose Profile Icon</label>
               <div className="flex flex-wrap gap-2">
-                {AVATAR_EMOJIS.map(emoji => (
+                {AVATAR_EMOJIS.map((emoji) => (
                   <button
                     key={emoji}
                     type="button"
-                    onClick={() => setData(p => ({ ...p, avatar_emoji: emoji }))}
-                    className={`w-11 h-11 rounded-xl text-2xl flex items-center justify-center transition-all border-2 ${
+                    onClick={() => setData((p) => ({ ...p, avatar_emoji: emoji }))}
+                    className={`text-2xl w-10 h-10 rounded-xl transition-all flex items-center justify-center ${
                       data.avatar_emoji === emoji
-                        ? 'border-cyan-500 bg-cyan-500/10 scale-110'
-                        : 'border-slate-700 bg-slate-800 hover:border-slate-600'
+                        ? 'bg-cyan-500/20 border-2 border-cyan-400 scale-110 shadow-md shadow-cyan-500/20'
+                        : 'bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700'
                     }`}
                   >
                     {emoji}
                   </button>
                 ))}
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Display Name *</label>
-              <input
-                type="text"
-                value={data.display_name}
-                onChange={e => setData(p => ({ ...p, display_name: e.target.value }))}
-                placeholder="How should we call you?"
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Short Bio <span className="text-slate-500">(optional)</span></label>
-              <textarea
-                value={data.bio}
-                onChange={e => setData(p => ({ ...p, bio: e.target.value }))}
-                placeholder="e.g. UPSC aspirant from Jaipur. Preparing for CSE 2027."
-                rows={3}
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Your Email</label>
-              <input
-                type="email"
-                value={userEmail}
-                disabled
-                className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-800 rounded-xl text-sm text-slate-500 cursor-not-allowed"
-              />
-            </div>
-          </div>
-        )
-
-      // ── STEP 2: Education & Goals ─────────────────────────────────────────────
-      case 2:
-        return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-2">I am a...</label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {EDUCATION_TYPES.map(type => (
-                  <button
-                    key={type.value}
-                    type="button"
-                    onClick={() => setData(p => ({ ...p, education_type: type.value }))}
-                    className={`p-3 rounded-xl border text-left transition-all ${
-                      data.education_type === type.value
-                        ? 'border-cyan-500 bg-cyan-500/10 text-cyan-300'
-                        : 'border-slate-700 bg-slate-800 text-slate-300 hover:border-slate-600'
-                    }`}
-                  >
-                    <div className="text-xl mb-1">{type.emoji}</div>
-                    <div className="text-xs font-medium">{type.label}</div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-1.5">Institution / School / College <span className="text-slate-500">(optional)</span></label>
-              <input
-                type="text"
-                value={data.current_institution}
-                onChange={e => setData(p => ({ ...p, current_institution: e.target.value }))}
-                placeholder="e.g. Delhi University, IIT Bombay, Self-study"
-                className="w-full px-3.5 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-2">Career & Study Interests <span className="text-slate-500">(pick all that apply)</span></label>
-              <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto">
-                {CAREER_INTERESTS_OPTIONS.map(interest => (
-                  <button
-                    key={interest}
-                    type="button"
-                    onClick={() => toggleCareerInterest(interest)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                      data.career_interests.includes(interest)
-                        ? 'border-cyan-500 bg-cyan-500/15 text-cyan-300'
-                        : 'border-slate-700 bg-slate-800 text-slate-400 hover:border-slate-600'
-                    }`}
-                  >
-                    {interest}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">Daily Study Goal</label>
-                <div className="flex items-center gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Full Name</label>
                   <input
-                    type="range"
-                    min={0.5}
-                    max={12}
-                    step={0.5}
-                    value={data.daily_study_goal_hours}
-                    onChange={e => setData(p => ({ ...p, daily_study_goal_hours: parseFloat(e.target.value) }))}
-                    className="flex-1 accent-cyan-500"
+                    type="text"
+                    value={data.display_name}
+                    onChange={(e) => setData((p) => ({ ...p, display_name: e.target.value }))}
+                    placeholder="Enter your name"
+                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
                   />
-                  <span className="text-cyan-400 font-mono text-sm w-16 text-right">{data.daily_study_goal_hours}h/day</span>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Preferred Language</label>
+                  <select
+                    value={data.preferred_language}
+                    onChange={(e) => setData((p) => ({ ...p, preferred_language: e.target.value }))}
+                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                  >
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi / Hinglish</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
               </div>
+            </div>
+
+            {/* Education Level */}
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-slate-300">Current Educational Level</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {EDUCATION_LEVELS.map((level) => (
+                  <button
+                    key={level.value}
+                    type="button"
+                    onClick={() => setData((p) => ({ ...p, education_type: level.value }))}
+                    className={`flex items-center gap-3 p-3 rounded-xl border text-left transition-all ${
+                      data.education_type === level.value
+                        ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-300 shadow-sm'
+                        : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700'
+                    }`}
+                  >
+                    <span className="text-xl">{level.emoji}</span>
+                    <span className="text-xs font-semibold">{level.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Institution & Course Details */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">Best Study Time</label>
-                <select
-                  value={data.preferred_study_time}
-                  onChange={e => setData(p => ({ ...p, preferred_study_time: e.target.value }))}
-                  className="w-full px-3 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                >
-                  <option value="morning">🌅 Morning</option>
-                  <option value="afternoon">☀️ Afternoon</option>
-                  <option value="evening">🌆 Evening</option>
-                  <option value="night">🌙 Night</option>
-                </select>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">College or School Name</label>
+                <input
+                  type="text"
+                  value={data.current_institution}
+                  onChange={(e) => setData((p) => ({ ...p, current_institution: e.target.value }))}
+                  placeholder="e.g. Delhi University, IIT, Kendriya Vidyalaya"
+                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Course or Degree</label>
+                <input
+                  type="text"
+                  value={data.course_degree}
+                  onChange={(e) => setData((p) => ({ ...p, course_degree: e.target.value }))}
+                  placeholder="e.g. B.Tech, BCA, B.Sc, B.Com, Class 12"
+                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Branch or Stream</label>
+                <input
+                  type="text"
+                  value={data.branch_stream}
+                  onChange={(e) => setData((p) => ({ ...p, branch_stream: e.target.value }))}
+                  placeholder="e.g. Computer Science, Science, Commerce"
+                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">Current Semester or Class</label>
+                <input
+                  type="text"
+                  value={data.semester_class}
+                  onChange={(e) => setData((p) => ({ ...p, semester_class: e.target.value }))}
+                  placeholder="e.g. 5th Semester, 3rd Year, 12th Grade"
+                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500"
+                />
               </div>
             </div>
           </div>
         )
 
-      // ── STEP 3: Exams ─────────────────────────────────────────────────────────
+      // ── STEP 3: Personal Goals ──
       case 3:
         return (
           <div className="space-y-5">
-            <p className="text-sm text-slate-400">
-              Add your upcoming exams — competitive exams, semester finals, certifications, anything.
-              These will appear as countdown timers on your dashboard.
-            </p>
-
-            {/* Existing exams list */}
-            {data.exams.length > 0 && (
-              <div className="space-y-2">
-                {data.exams.map((exam, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-slate-800 border border-slate-700">
-                    <div>
-                      <p className="text-sm font-medium text-white">{exam.name}</p>
-                      <p className="text-xs text-slate-400">{exam.subject} {exam.exam_date && `· ${exam.exam_date}`}</p>
-                    </div>
-                    <button onClick={() => removeExam(idx)} className="text-slate-500 hover:text-rose-400 transition-colors">
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Add exam form */}
-            <div className="p-4 rounded-xl border border-dashed border-slate-600 space-y-3">
-              <p className="text-xs font-medium text-slate-400">Add Exam</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  placeholder="Exam name (e.g. Rajasthan PCS, IELTS, JEE)"
-                  value={newExam.name}
-                  onChange={e => setNewExam(p => ({ ...p, name: e.target.value }))}
-                  className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                />
-                <input
-                  type="text"
-                  placeholder="Subject / Paper (optional)"
-                  value={newExam.subject}
-                  onChange={e => setNewExam(p => ({ ...p, subject: e.target.value }))}
-                  className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                />
-                <input
-                  type="date"
-                  value={newExam.exam_date}
-                  onChange={e => setNewExam(p => ({ ...p, exam_date: e.target.value }))}
-                  className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
-                />
-                <div className="flex gap-1.5">
-                  {EXAM_COLORS.map(color => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => setNewExam(p => ({ ...p, color }))}
-                      className={`flex-1 h-8 rounded-lg transition-all border-2 ${
-                        newExam.color === color ? 'border-white scale-110' : 'border-transparent'
-                      } bg-${color}-500`}
-                    />
-                  ))}
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={addExam}
-                disabled={!newExam.name.trim()}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold disabled:opacity-40 transition-all"
-              >
-                <Plus className="w-4 h-4" /> Add Exam
-              </button>
+            <div>
+              <h2 className="text-lg font-bold text-white">Your Personal Ambitions & Goals</h2>
+              <p className="text-xs text-slate-400">Select what you want to achieve or add your custom milestones.</p>
             </div>
 
-            <p className="text-xs text-slate-500 text-center">
-              💡 You can add or edit exams anytime from your dashboard
-            </p>
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-slate-300">Choose Goals (Select all that apply)</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {PRESET_GOALS.map((goal) => {
+                  const isSelected = data.goals.includes(goal)
+                  return (
+                    <button
+                      key={goal}
+                      type="button"
+                      onClick={() => toggleGoal(goal)}
+                      className={`flex items-start gap-2.5 p-3 rounded-xl border text-left transition-all ${
+                        isSelected
+                          ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-300'
+                          : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:border-slate-700'
+                      }`}
+                    >
+                      <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${isSelected ? 'text-cyan-400' : 'text-slate-600'}`} />
+                      <span className="text-xs font-medium leading-snug">{goal}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Custom Goal Input */}
+            <div className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+              <label className="block text-xs font-semibold text-slate-300">Add a Custom Goal</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={customGoal}
+                  onChange={(e) => setCustomGoal(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomGoal())}
+                  placeholder="e.g. Master Power BI and build 3 dashboards..."
+                  className="flex-1 px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+                />
+                <button
+                  type="button"
+                  onClick={addCustomGoal}
+                  disabled={!customGoal.trim()}
+                  className="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-40"
+                >
+                  Add Goal
+                </button>
+              </div>
+            </div>
+
+            {data.goals.length > 0 && (
+              <p className="text-xs text-cyan-400/80 text-center">
+                🎯 {data.goals.length} goals selected for your personal tracking.
+              </p>
+            )}
           </div>
         )
 
-      // ── STEP 4: Subjects & Skills ─────────────────────────────────────────────
+      // ── STEP 4: Subjects & Areas ──
       case 4:
         return (
           <div className="space-y-5">
-            <p className="text-sm text-slate-400">
-              Add the subjects, skills, or topics you're currently studying. 
-              These will show on your dashboard with individual progress tracking.
-            </p>
+            <div>
+              <h2 className="text-lg font-bold text-white">Subjects & Learning Areas</h2>
+              <p className="text-xs text-slate-400">Add the subjects, courses, or skills you are actively studying.</p>
+            </div>
 
-            {/* Example chips by career interest */}
-            {data.career_interests.length > 0 && (
-              <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60">
-                <p className="text-xs text-slate-400 mb-2">💡 Quick-add based on your interests:</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {getSuggestedSubjects(data.career_interests).map(s => (
-                    <button
-                      key={s.name}
-                      type="button"
-                      onClick={() => {
-                        if (!data.subjects.find(x => x.name === s.name)) {
-                          setData(p => ({ ...p, subjects: [...p.subjects, s] }))
-                        }
-                      }}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs border border-slate-600 bg-slate-900 text-slate-300 hover:border-cyan-500 hover:text-cyan-300 transition-all"
-                    >
-                      {s.icon_emoji} {s.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Existing subjects list */}
-            {data.subjects.length > 0 && (
-              <div className="grid grid-cols-2 gap-2">
-                {data.subjects.map((sub, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-slate-800 border border-slate-700">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">{sub.icon_emoji}</span>
-                      <div>
-                        <p className="text-xs font-medium text-white">{sub.name}</p>
-                        <p className="text-[10px] text-slate-500">{sub.category}</p>
-                      </div>
+            {/* Active Subjects List */}
+            <div className="space-y-2">
+              {data.subjects.map((sub, idx) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between p-3 rounded-xl bg-slate-900/80 border border-slate-800"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">{sub.icon_emoji}</span>
+                    <div>
+                      <p className="text-xs sm:text-sm font-semibold text-white">{sub.name}</p>
+                      <span className="text-[10px] text-cyan-400 font-mono uppercase">{sub.category}</span>
                     </div>
-                    <button onClick={() => removeSubject(idx)} className="text-slate-600 hover:text-rose-400 transition-colors">
-                      <X className="w-3.5 h-3.5" />
-                    </button>
                   </div>
-                ))}
-              </div>
-            )}
+                  <button
+                    type="button"
+                    onClick={() => removeSubject(idx)}
+                    className="p-1 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
 
-            {/* Add subject form */}
-            <div className="p-4 rounded-xl border border-dashed border-slate-600 space-y-3">
-              <p className="text-xs font-medium text-slate-400">Add Subject / Skill / Topic</p>
+            {/* Add Subject Box */}
+            <div className="p-4 rounded-2xl bg-slate-900/80 border border-dashed border-slate-700 space-y-3">
+              <p className="text-xs font-bold text-slate-300">Add New Subject / Topic</p>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <input
                   type="text"
-                  placeholder="e.g. SQL, Polity, Reading, Python"
-                  value={newSubject.name}
-                  onChange={e => setNewSubject(p => ({ ...p, name: e.target.value }))}
-                  className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  value={newSubName}
+                  onChange={(e) => setNewSubName(e.target.value)}
+                  placeholder="Subject Name (e.g. Data Structures, SQL, Economics)"
+                  className="px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
                 />
+
                 <select
-                  value={newSubject.category}
-                  onChange={e => setNewSubject(p => ({ ...p, category: e.target.value }))}
-                  className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                  value={newSubCategory}
+                  onChange={(e) => setNewSubCategory(e.target.value)}
+                  className="px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
                 >
-                  {SUBJECT_CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                  <option value="Subject">Academic Subject</option>
+                  <option value="Skill">Professional Skill</option>
+                  <option value="Language">Language</option>
+                  <option value="Competitive Exam">Exam Topic</option>
                 </select>
               </div>
-              <div>
-                <p className="text-xs text-slate-500 mb-1.5">Icon</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {SUBJECT_ICONS.map(icon => (
+
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-slate-400">Icon:</span>
+                <div className="flex gap-1 overflow-x-auto py-1">
+                  {SUBJECT_ICONS.map((emoji) => (
                     <button
-                      key={icon}
+                      key={emoji}
                       type="button"
-                      onClick={() => setNewSubject(p => ({ ...p, icon_emoji: icon }))}
-                      className={`w-9 h-9 rounded-lg text-xl flex items-center justify-center border transition-all ${
-                        newSubject.icon_emoji === icon ? 'border-cyan-500 bg-cyan-500/10' : 'border-slate-700 bg-slate-800'
-                      }`}
+                      onClick={() => setNewSubEmoji(emoji)}
+                      className={`text-lg p-1 rounded-lg ${newSubEmoji === emoji ? 'bg-cyan-500/20 border border-cyan-400' : 'hover:bg-slate-800'}`}
                     >
-                      {icon}
+                      {emoji}
                     </button>
                   ))}
                 </div>
               </div>
+
               <button
                 type="button"
                 onClick={addSubject}
-                disabled={!newSubject.name.trim()}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold disabled:opacity-40 transition-all"
+                disabled={!newSubName.trim()}
+                className="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl text-xs font-bold transition-all disabled:opacity-40"
               >
-                <Plus className="w-4 h-4" /> Add Subject
+                Add Subject
               </button>
             </div>
           </div>
         )
 
-      // ── STEP 5: Dashboard Layout ───────────────────────────────────────────────
+      // ── STEP 5: Daily Routine ──
       case 5:
         return (
-          <div className="space-y-4">
-            <p className="text-sm text-slate-400">
-              Choose which widgets to show on your dashboard. You can change these anytime.
-            </p>
+          <div className="space-y-5">
+            <div>
+              <h2 className="text-lg font-bold text-white">Daily Routine & Focus Target</h2>
+              <p className="text-xs text-slate-400">Configure your daily study targets, working hours, and study rhythm.</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+                <label className="block text-xs font-semibold text-slate-300">Daily Study Target</label>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="range"
+                    min="1"
+                    max="12"
+                    step="0.5"
+                    value={data.daily_study_goal_hours}
+                    onChange={(e) => setData((p) => ({ ...p, daily_study_goal_hours: parseFloat(e.target.value) }))}
+                    className="flex-1 accent-cyan-400"
+                  />
+                  <span className="text-sm font-bold text-cyan-400 w-16 text-right">
+                    {data.daily_study_goal_hours} hrs/day
+                  </span>
+                </div>
+                <p className="text-[11px] text-slate-500">Realistic targets build long-term consistency.</p>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+                <label className="block text-xs font-semibold text-slate-300">Preferred Study Schedule</label>
+                <select
+                  value={data.preferred_study_time}
+                  onChange={(e) => setData((p) => ({ ...p, preferred_study_time: e.target.value }))}
+                  className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+                >
+                  <option value="morning">Early Morning (5 AM - 9 AM)</option>
+                  <option value="afternoon">Afternoon (12 PM - 4 PM)</option>
+                  <option value="evening">Evening (5 PM - 9 PM)</option>
+                  <option value="night">Night Owl (10 PM - 2 AM)</option>
+                </select>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+                <label className="block text-xs font-semibold text-slate-300">Target Wake-Up Time</label>
+                <input
+                  type="text"
+                  value={data.wake_up_time}
+                  onChange={(e) => setData((p) => ({ ...p, wake_up_time: e.target.value }))}
+                  placeholder="e.g. 06:00 AM"
+                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+
+              <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2">
+                <label className="block text-xs font-semibold text-slate-300">Break Schedule</label>
+                <input
+                  type="text"
+                  value={data.break_time}
+                  onChange={(e) => setData((p) => ({ ...p, break_time: e.target.value }))}
+                  placeholder="e.g. 10 mins after 50 mins session"
+                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white focus:outline-none focus:border-cyan-500"
+                />
+              </div>
+            </div>
+          </div>
+        )
+
+      // ── STEP 6: Dashboard Setup ──
+      case 6:
+        return (
+          <div className="space-y-5">
+            <div>
+              <h2 className="text-lg font-bold text-white">Customize Your Dashboard Widgets</h2>
+              <p className="text-xs text-slate-400">Select which widgets appear on your command center. You can reorder or toggle them anytime.</p>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {ALL_WIDGETS.map(widget => {
-                const isSelected = data.selected_widgets.includes(widget.key)
+              {ALL_WIDGETS.map((w) => {
+                const isSelected = data.selected_widgets.includes(w.key)
                 return (
                   <button
-                    key={widget.key}
+                    key={w.key}
                     type="button"
-                    onClick={() => toggleWidget(widget.key)}
-                    className={`p-4 rounded-xl border text-left transition-all ${
+                    onClick={() => toggleWidget(w.key)}
+                    className={`p-3.5 rounded-2xl border text-left transition-all ${
                       isSelected
-                        ? 'border-cyan-500 bg-cyan-500/10 ring-1 ring-cyan-500/30'
-                        : 'border-slate-700 bg-slate-800 hover:border-slate-600'
+                        ? 'bg-cyan-500/10 border-cyan-500/50 text-cyan-300 shadow-sm'
+                        : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:border-slate-700'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-2xl">{widget.icon}</span>
-                      {isSelected && <CheckCircle2 className="w-4 h-4 text-cyan-400" />}
+                      <span className="text-xl">{w.icon}</span>
+                      <CheckCircle2 className={`w-4 h-4 ${isSelected ? 'text-cyan-400' : 'text-slate-700'}`} />
                     </div>
-                    <p className={`text-sm font-semibold ${isSelected ? 'text-cyan-300' : 'text-white'}`}>{widget.label}</p>
-                    <p className="text-xs text-slate-500 mt-0.5">{widget.desc}</p>
+                    <p className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-slate-300'}`}>{w.label}</p>
+                    <p className="text-[11px] text-slate-500 mt-0.5">{w.desc}</p>
                   </button>
                 )
               })}
             </div>
-            <p className="text-xs text-slate-500 text-center">
-              {data.selected_widgets.length} widget{data.selected_widgets.length !== 1 ? 's' : ''} selected
-            </p>
           </div>
         )
 
-      // ── STEP 6: Appearance ────────────────────────────────────────────────────
-      case 6:
+      // ── STEP 7: Finish ──
+      case 7:
         return (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-3">Theme</label>
-              <div className="grid grid-cols-3 gap-3">
-                {THEMES.map(theme => (
-                  <button
-                    key={theme.value}
-                    type="button"
-                    onClick={() => setData(p => ({ ...p, theme: theme.value }))}
-                    className={`p-4 rounded-xl border-2 transition-all ${
-                      data.theme === theme.value
-                        ? 'border-cyan-500 ring-2 ring-cyan-500/30'
-                        : 'border-slate-700 hover:border-slate-600'
-                    }`}
-                  >
-                    <div className={`w-full h-10 rounded-lg mb-2 border ${theme.preview}`} />
-                    <p className="text-xs text-center text-slate-300 font-medium">{theme.label}</p>
-                    {data.theme === theme.value && (
-                      <CheckCircle2 className="w-4 h-4 text-cyan-400 mx-auto mt-1" />
-                    )}
-                  </button>
-                ))}
-              </div>
+          <div className="space-y-6 text-center py-4">
+            <div className="w-16 h-16 rounded-3xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400 shadow-xl shadow-emerald-500/10">
+              <CheckCircle2 className="w-8 h-8" />
             </div>
 
-            <div>
-              <label className="block text-xs font-medium text-slate-300 mb-3">Accent Color</label>
-              <div className="flex gap-3">
-                {ACCENT_COLORS.map(color => (
-                  <button
-                    key={color.value}
-                    type="button"
-                    onClick={() => setData(p => ({ ...p, accent_color: color.value }))}
-                    className={`w-10 h-10 rounded-xl ${color.className} transition-all border-2 ${
-                      data.accent_color === color.value
-                        ? 'border-white scale-125 shadow-lg'
-                        : 'border-transparent hover:scale-110'
-                    }`}
-                  />
-                ))}
-              </div>
+            <div className="space-y-2">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                Your personal StudyHub is ready!
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto">
+                We've configured your workspace based on your academic path, goals, and daily focus targets.
+              </p>
             </div>
 
-            {/* Summary */}
-            <div className="p-4 rounded-xl bg-slate-800/50 border border-slate-700/50 space-y-3">
-              <p className="text-xs font-semibold text-slate-300">📋 Your Setup Summary</p>
-              <div className="space-y-1.5 text-xs text-slate-400">
-                <p>👤 <span className="text-white">{data.display_name}</span> {data.avatar_emoji}</p>
-                <p>🎓 {EDUCATION_TYPES.find(e => e.value === data.education_type)?.label || 'Not set'}</p>
-                <p>⏱️ Goal: <span className="text-cyan-400">{data.daily_study_goal_hours}h/day</span></p>
-                <p>📅 {data.exams.length} exam{data.exams.length !== 1 ? 's' : ''} added</p>
-                <p>📚 {data.subjects.length} subject{data.subjects.length !== 1 ? 's' : ''} added</p>
-                <p>🧩 {data.selected_widgets.length} widgets selected</p>
+            {/* Setup Summary Card */}
+            <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 text-left max-w-md mx-auto space-y-2.5 text-xs text-slate-300">
+              <div className="flex justify-between py-1 border-b border-slate-800">
+                <span className="text-slate-400">Student Name:</span>
+                <span className="font-semibold text-white">{data.display_name}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-800">
+                <span className="text-slate-400">Education Track:</span>
+                <span className="font-semibold text-cyan-400 capitalize">{data.education_type}</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-800">
+                <span className="text-slate-400">Active Goals:</span>
+                <span className="font-semibold text-white">{data.goals.length} Goals</span>
+              </div>
+              <div className="flex justify-between py-1 border-b border-slate-800">
+                <span className="text-slate-400">Subjects Added:</span>
+                <span className="font-semibold text-white">{data.subjects.length} Subjects</span>
+              </div>
+              <div className="flex justify-between py-1">
+                <span className="text-slate-400">Daily Study Target:</span>
+                <span className="font-semibold text-emerald-400">{data.daily_study_goal_hours} Hours / Day</span>
               </div>
             </div>
           </div>
@@ -666,147 +727,81 @@ export function OnboardingWizard({ userId, userEmail, initialName, existingProfi
     }
   }
 
-  const stepInfo = STEPS[currentStep - 1]
-  const StepIcon = stepInfo.icon
-
   return (
-    <div className="min-h-screen bg-[#0c0d14] flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-medium mb-4">
-            <Sparkles className="w-3.5 h-3.5" />
-            Personalized Setup
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">
-            Welcome to StudyHub{data.display_name ? `, ${data.display_name.split(' ')[0]}` : ''}! 🎉
-          </h1>
-          <p className="text-slate-400 text-sm">
-            Let's set up your personal dashboard in just a few steps.
-          </p>
-        </div>
-
-        {/* Step Progress */}
-        <div className="flex items-center gap-1 mb-8">
-          {STEPS.map((step, idx) => {
-            const done = idx + 1 < currentStep
-            const active = idx + 1 === currentStep
-            return (
-              <div key={step.id} className="flex items-center flex-1">
-                <div
-                  className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
-                    done ? 'bg-cyan-500 text-slate-950' :
-                    active ? 'bg-cyan-500/20 border-2 border-cyan-500 text-cyan-400' :
-                    'bg-slate-800 border border-slate-700 text-slate-500'
-                  }`}
-                >
-                  {done ? <CheckCircle2 className="w-4 h-4" /> : step.id}
-                </div>
-                {idx < STEPS.length - 1 && (
-                  <div className={`flex-1 h-0.5 mx-1 ${done ? 'bg-cyan-500' : 'bg-slate-800'}`} />
-                )}
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Card */}
-        <div className="bg-[#141724] border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
-          {/* Card Header */}
-          <div className="px-6 py-5 border-b border-slate-800 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center">
-              <StepIcon className="w-5 h-5 text-cyan-400" />
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-white">{stepInfo.title}</h2>
-              <p className="text-xs text-slate-400">{stepInfo.desc} · Step {currentStep} of {STEPS.length}</p>
-            </div>
+    <div className="min-h-screen bg-[#090b10] text-slate-100 flex flex-col justify-center items-center p-4 sm:p-6 font-sans">
+      <div className="w-full max-w-2xl bg-[#111420] border border-slate-800/90 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-6">
+        {/* Step Progress Bar */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-xs text-slate-400">
+            <span className="font-semibold text-cyan-400">
+              Step {currentStep} of 7 — {STEPS[currentStep - 1].title}
+            </span>
+            <button
+              type="button"
+              onClick={handleSkip}
+              className="text-slate-500 hover:text-slate-300 text-xs transition-colors"
+            >
+              Skip setup
+            </button>
           </div>
 
-          {/* Card Content */}
-          <div className="px-6 py-6">{renderStep()}</div>
+          <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-300 rounded-full"
+              style={{ width: `${(currentStep / 7) * 100}%` }}
+            />
+          </div>
+        </div>
 
-          {/* Error */}
-          {error && (
-            <div className="mx-6 mb-4 px-4 py-2.5 rounded-xl bg-rose-950/40 border border-rose-800/60 text-rose-300 text-xs">
-              ⚠️ {error}
-            </div>
+        {error && (
+          <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
+            {error}
+          </div>
+        )}
+
+        {/* Step Content */}
+        <div className="min-h-[340px]">{renderStep()}</div>
+
+        {/* Action Controls */}
+        <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between">
+          {currentStep > 1 ? (
+            <button
+              type="button"
+              onClick={handleBack}
+              disabled={saving}
+              className="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-300 transition-all flex items-center gap-1.5"
+            >
+              <ArrowLeft className="w-4 h-4" /> Back
+            </button>
+          ) : (
+            <div />
           )}
 
-          {/* Card Footer */}
-          <div className="px-6 py-4 border-t border-slate-800 flex items-center justify-between">
-            <div className="flex gap-2">
-              {currentStep > 1 && (
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  disabled={saving}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition-all disabled:opacity-50"
-                >
-                  <ArrowLeft className="w-3.5 h-3.5" /> Back
-                </button>
-              )}
-              <button
-                type="button"
-                onClick={handleSkip}
-                disabled={saving}
-                className="px-4 py-2 rounded-xl text-slate-500 hover:text-slate-300 text-xs transition-colors disabled:opacity-50"
-              >
-                Skip Setup
-              </button>
-            </div>
-
-            {currentStep < STEPS.length ? (
-              <button
-                type="button"
-                onClick={handleNext}
-                disabled={saving}
-                className="flex items-center gap-2 px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-sm font-bold shadow-lg shadow-cyan-500/20 transition-all disabled:opacity-50"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-                Next <ArrowRight className="w-4 h-4" />
-              </button>
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={saving}
+            className="py-2.5 px-6 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs shadow-lg shadow-cyan-600/25 transition-all flex items-center gap-2"
+          >
+            {saving ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Launching...</span>
+              </>
+            ) : currentStep === 7 ? (
+              <>
+                <span>Launch My Dashboard</span>
+                <ArrowRight className="w-4 h-4" />
+              </>
             ) : (
-              <button
-                type="button"
-                onClick={handleComplete}
-                disabled={saving}
-                className="flex items-center gap-2 px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-bold shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50"
-              >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                Complete Setup
-              </button>
+              <>
+                <span>Continue</span>
+                <ArrowRight className="w-4 h-4" />
+              </>
             )}
-          </div>
+          </button>
         </div>
       </div>
     </div>
   )
-}
-
-// ─── Helper: suggest subjects based on selected career interests ─────────────
-function getSuggestedSubjects(interests: string[]) {
-  const map: Record<string, Array<{ name: string; category: string; icon_emoji: string; color: string }>> = {
-    'Data Science':         [{ name: 'Python', category: 'Skill', icon_emoji: '🐍', color: 'blue' }, { name: 'SQL', category: 'Skill', icon_emoji: '🗄️', color: 'cyan' }, { name: 'Statistics', category: 'Subject', icon_emoji: '📊', color: 'violet' }],
-    'Web Development':      [{ name: 'JavaScript', category: 'Skill', icon_emoji: '💛', color: 'amber' }, { name: 'React', category: 'Skill', icon_emoji: '⚛️', color: 'cyan' }, { name: 'CSS', category: 'Skill', icon_emoji: '🎨', color: 'blue' }],
-    'Civil Services (UPSC)':[{ name: 'Polity', category: 'Subject', icon_emoji: '🏛️', color: 'amber' }, { name: 'History', category: 'Subject', icon_emoji: '📜', color: 'rose' }, { name: 'Geography', category: 'Subject', icon_emoji: '🌍', color: 'emerald' }, { name: 'Current Affairs', category: 'Topic', icon_emoji: '📰', color: 'blue' }],
-    'State PCS (Rajasthan / UP / MP)': [{ name: 'Rajasthan GK', category: 'Subject', icon_emoji: '🏜️', color: 'amber' }, { name: 'Indian Polity', category: 'Subject', icon_emoji: '🏛️', color: 'blue' }, { name: 'Maths', category: 'Subject', icon_emoji: '🔢', color: 'violet' }],
-    'Defence (Agniveer / NDA)':[{ name: 'Physics', category: 'Subject', icon_emoji: '⚡', color: 'amber' }, { name: 'Maths', category: 'Subject', icon_emoji: '🔢', color: 'blue' }, { name: 'English', category: 'Subject', icon_emoji: '🔤', color: 'emerald' }],
-    'SSC / Banking':        [{ name: 'Quantitative Aptitude', category: 'Subject', icon_emoji: '🔢', color: 'blue' }, { name: 'Reasoning', category: 'Subject', icon_emoji: '🧩', color: 'violet' }, { name: 'English', category: 'Subject', icon_emoji: '🔤', color: 'emerald' }, { name: 'GK', category: 'Subject', icon_emoji: '🌐', color: 'cyan' }],
-    'IELTS / TOEFL':        [{ name: 'Speaking', category: 'Skill', icon_emoji: '🗣️', color: 'rose' }, { name: 'Listening', category: 'Skill', icon_emoji: '👂', color: 'blue' }, { name: 'Reading', category: 'Skill', icon_emoji: '📖', color: 'emerald' }, { name: 'Writing', category: 'Skill', icon_emoji: '✍️', color: 'violet' }],
-    'JEE / NEET':           [{ name: 'Physics', category: 'Subject', icon_emoji: '⚡', color: 'amber' }, { name: 'Chemistry', category: 'Subject', icon_emoji: '🧪', color: 'emerald' }, { name: 'Maths', category: 'Subject', icon_emoji: '🔢', color: 'blue' }],
-    'Machine Learning / AI':[{ name: 'Python', category: 'Skill', icon_emoji: '🐍', color: 'blue' }, { name: 'Linear Algebra', category: 'Subject', icon_emoji: '📐', color: 'violet' }, { name: 'Deep Learning', category: 'Topic', icon_emoji: '🧠', color: 'rose' }],
-    'Programming':          [{ name: 'DSA', category: 'Subject', icon_emoji: '🌲', color: 'emerald' }, { name: 'System Design', category: 'Topic', icon_emoji: '🏗️', color: 'cyan' }],
-  }
-  const results: Array<{ name: string; category: string; icon_emoji: string; color: string }> = []
-  const seen = new Set<string>()
-  interests.forEach(interest => {
-    (map[interest] || []).forEach(s => {
-      if (!seen.has(s.name)) {
-        seen.add(s.name)
-        results.push(s)
-      }
-    })
-  })
-  return results.slice(0, 12)
 }

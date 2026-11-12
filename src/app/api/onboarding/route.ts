@@ -21,6 +21,15 @@ export async function POST(request: NextRequest) {
       career_interests,
       current_institution,
       current_year,
+      course_degree,
+      branch_stream,
+      semester_class,
+      preferred_language,
+      wake_up_time,
+      study_schedule,
+      break_time,
+      working_hours,
+      weekly_target_hours,
       daily_study_goal_hours,
       preferred_study_time,
       selected_widgets,
@@ -30,6 +39,7 @@ export async function POST(request: NextRequest) {
       onboarding_complete,
       exams,
       subjects,
+      goals,
     } = body
 
     // 1. Upsert onboarding profile
@@ -44,6 +54,15 @@ export async function POST(request: NextRequest) {
         career_interests: career_interests || [],
         current_institution,
         current_year,
+        course_degree,
+        branch_stream,
+        semester_class,
+        preferred_language: preferred_language || 'English',
+        wake_up_time,
+        study_schedule,
+        break_time,
+        working_hours,
+        weekly_target_hours: weekly_target_hours || 14,
         daily_study_goal_hours,
         preferred_study_time,
         selected_widgets: selected_widgets || [],
@@ -102,7 +121,21 @@ export async function POST(request: NextRequest) {
       await supabase.from('user_subjects').insert(subjectsToInsert)
     }
 
-    // 5. Update profile display_name + theme in main profiles table
+    // 5. Save personal goals (insert new, skip duplicates)
+    if (goals && goals.length > 0) {
+      const goalsToInsert = goals.map((g: any) => ({
+        user_id: user.id,
+        title: typeof g === 'string' ? g : g.title,
+        type: 'custom',
+        target_value: 100,
+        current_value: 0,
+        unit: '%',
+        is_completed: false,
+      }))
+      await supabase.from('user_goals').insert(goalsToInsert)
+    }
+
+    // 6. Update profile display_name + theme in main profiles table
     await supabase
       .from('profiles')
       .update({

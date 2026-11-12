@@ -12,7 +12,6 @@ import {
   VolumeX,
   Radio,
   BookOpen,
-  Brain,
   CheckCircle2,
   ListTodo,
   Layers,
@@ -24,7 +23,7 @@ import {
 } from 'lucide-react'
 
 export function StudyToolsClient() {
-  const [activeTab, setActiveTab] = useState<'pomodoro' | 'ambient' | 'ai'>('pomodoro')
+  const [activeTab, setActiveTab] = useState<'pomodoro' | 'ambient'>('pomodoro')
 
   // Pomodoro State
   const [pomodoroSeconds, setPomodoroSeconds] = useState(25 * 60)
@@ -40,12 +39,6 @@ export function StudyToolsClient() {
   const audioContextRef = useRef<AudioContext | null>(null)
   const noiseNodeRef = useRef<AudioNode | null>(null)
   const gainNodeRef = useRef<GainNode | null>(null)
-
-  // AI Assistant State
-  const [aiTopic, setAiTopic] = useState('')
-  const [aiAction, setAiAction] = useState<'explain' | 'summarize' | 'quiz'>('explain')
-  const [aiLoading, setAiLoading] = useState(false)
-  const [aiResponse, setAiResponse] = useState<string | null>(null)
 
   // Timer Interval
   useEffect(() => {
@@ -144,39 +137,6 @@ export function StudyToolsClient() {
   }
 
   // AI Assistant Generator
-  const handleAiGenerate = () => {
-    if (!aiTopic.trim()) return
-    setAiLoading(true)
-    setAiResponse(null)
-
-    setTimeout(() => {
-      setAiLoading(false)
-      if (aiAction === 'explain') {
-        setAiResponse(
-          `### Concept Explanation: ${aiTopic}\n\n` +
-            `**Core Definition:** In academic studies, **${aiTopic}** represents a fundamental framework that balances efficiency and abstraction.\n\n` +
-            `**Key Insight:** Break it down into modular parts: 1) Identification of inputs, 2) Transforming rules, 3) Guaranteed correctness boundaries.\n\n` +
-            `**Example:** Think of it like a mathematical function pipeline where state changes are explicit and reproducible.`
-        )
-      } else if (aiAction === 'summarize') {
-        setAiResponse(
-          `### Chapter Summary: ${aiTopic}\n\n` +
-            `- **Main Thesis:** The chapter outlines how primitive ideas combine to build resilient compound abstractions.\n` +
-            `- **Key Takeaway 1:** Avoid premature optimization; prioritize human readability and semantic clarity.\n` +
-            `- **Key Takeaway 2:** Spaced repetition and active recall significantly improve retention rates for technical concepts.`
-        )
-      } else {
-        setAiResponse(
-          `### Practice Quiz: ${aiTopic}\n\n` +
-            `**Question 1:** What is the primary advantage of isolating state?\n` +
-            `*A)* Faster compile time | *B)* Deterministic correctness | *C)* Reduced disk usage\n` +
-            `*(Answer: B)*\n\n` +
-            `**Question 2:** Explain in one sentence how to verify algorithmic convergence.`
-        )
-      }
-    }, 1200)
-  }
-
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60)
     const s = secs % 60
@@ -189,10 +149,10 @@ export function StudyToolsClient() {
       <div className="border-b border-slate-800 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-3">
-            <Timer className="w-7 h-7 text-cyan-400" /> Study Tools & Focus Room
+            <Timer className="w-7 h-7 text-cyan-400" /> Focus Room & Study Timer
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Pomodoro interval timer, ambient noise generators, and AI study partner.
+            Interval timer and offline ambient noise generator for distraction-free study.
           </p>
         </div>
 
@@ -217,16 +177,6 @@ export function StudyToolsClient() {
             }`}
           >
             Ambient Sounds
-          </button>
-          <button
-            onClick={() => setActiveTab('ai')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeTab === 'ai'
-                ? 'bg-cyan-500 text-slate-950 font-bold shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            AI Study Partner
           </button>
         </div>
       </div>
@@ -425,84 +375,6 @@ export function StudyToolsClient() {
               </button>
             </div>
           )}
-        </div>
-      )}
-
-      {/* 3. AI Study Partner */}
-      {activeTab === 'ai' && (
-        <div className="bg-slate-900/70 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6">
-          <div>
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <Brain className="w-5 h-5 text-cyan-400" /> AI Study Assistant
-            </h2>
-            <p className="text-xs text-slate-400 mt-1">
-              Ask questions, summarize book chapters, and generate instant practice quizzes.
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex gap-2">
-              <button
-                onClick={() => setAiAction('explain')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold ${
-                  aiAction === 'explain'
-                    ? 'bg-cyan-500 text-slate-950 font-bold'
-                    : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                Explain Concept
-              </button>
-              <button
-                onClick={() => setAiAction('summarize')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold ${
-                  aiAction === 'summarize'
-                    ? 'bg-cyan-500 text-slate-950 font-bold'
-                    : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                Summarize Topic
-              </button>
-              <button
-                onClick={() => setAiAction('quiz')}
-                className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold ${
-                  aiAction === 'quiz'
-                    ? 'bg-cyan-500 text-slate-950 font-bold'
-                    : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                Generate Quiz
-              </button>
-            </div>
-
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={aiTopic}
-                onChange={(e) => setAiTopic(e.target.value)}
-                placeholder="Enter textbook concept or chapter title (e.g. Lambda Calculus, Integration by Parts)..."
-                className="flex-1 px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-cyan-500"
-              />
-              <button
-                onClick={handleAiGenerate}
-                disabled={aiLoading || !aiTopic.trim()}
-                className="px-5 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs shadow-md shadow-cyan-500/20 disabled:opacity-50 transition-colors flex items-center gap-2"
-              >
-                {aiLoading ? (
-                  'Analyzing...'
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" /> Run
-                  </>
-                )}
-              </button>
-            </div>
-
-            {aiResponse && (
-              <div className="p-5 rounded-2xl bg-slate-950/70 border border-slate-800 text-xs sm:text-sm text-slate-200 leading-relaxed whitespace-pre-line animate-in fade-in">
-                {aiResponse}
-              </div>
-            )}
-          </div>
         </div>
       )}
     </div>

@@ -259,11 +259,16 @@ export function PersonalizedDashboard({
     await fetch(`/api/dashboard/goals?id=${id}`, { method: 'DELETE' })
   }
 
-  // ─── Greeting ──────────────────────────────────────────────────────────────
+  // ─── Greeting & Productivity ──────────────────────────────────────────────
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : hour < 21 ? 'Good Evening' : 'Good Night'
   const goalMinutes = Math.round((onboardingProfile?.daily_study_goal_hours || 2) * 60)
   const goalProgress = Math.min(100, Math.round((stats.todayStudyMinutes / goalMinutes) * 100))
+  const completedTasksCount = tasks.filter(t => t.is_completed).length
+  const pendingTasksCount = tasks.filter(t => !t.is_completed).length
+  const taskRate = tasks.length > 0 ? Math.round((completedTasksCount / tasks.length) * 100) : 0
+  const productivityScore = Math.min(100, Math.round((goalProgress * 0.5) + ((tasks.length > 0 ? taskRate : 50) * 0.5)))
+  const todayFormatted = new Date().toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 
   const WIDGET_LABELS: Record<string, { label: string; icon: string }> = {
     stats:    { label: 'Study Stats',     icon: '📊' },
@@ -672,37 +677,62 @@ export function PersonalizedDashboard({
   return (
     <div className="space-y-6">
       {/* ── Top Banner ──────────────────────────────────────────────────────── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 p-6 rounded-3xl border border-slate-800 shadow-xl">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <span className="text-3xl">{user.avatarEmoji || '🎓'}</span>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gradient-to-r from-slate-900 via-slate-900/90 to-[#121626] p-6 sm:p-7 rounded-3xl border border-slate-800 shadow-xl">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs font-medium text-cyan-400">
+            <CalendarDays className="w-4 h-4" />
+            <span>{todayFormatted}</span>
+          </div>
+
+          <div className="flex items-center gap-3.5">
+            <span className="text-3xl sm:text-4xl p-2 rounded-2xl bg-slate-800/80 border border-slate-700/80 shadow-md">
+              {user.avatarEmoji || '🎓'}
+            </span>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
-                {greeting}, {user.name.split(' ')[0]}! ✨
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                {greeting}, {user.name.split(' ')[0]}!
               </h1>
-              {onboardingProfile?.career_interests && onboardingProfile.career_interests.length > 0 && (
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Studying: {onboardingProfile.career_interests.slice(0, 3).join(' · ')}
-                </p>
-              )}
+              <p className="text-xs sm:text-sm text-slate-400 font-medium mt-0.5">
+                Every small step brings you closer to your goals.
+              </p>
             </div>
           </div>
-          {/* Daily goal progress bar */}
-          <div className="mt-2 flex items-center gap-3">
-            <div className="flex-1 max-w-xs bg-slate-800 h-2 rounded-full overflow-hidden">
-              <div className="bg-gradient-to-r from-cyan-500 to-blue-500 h-full rounded-full transition-all" style={{ width: `${goalProgress}%` }} />
+
+          {/* Quick Metrics Pills */}
+          <div className="flex flex-wrap items-center gap-3 pt-2 text-xs">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 font-semibold">
+              <Zap className="w-3.5 h-3.5" />
+              <span>Productivity: {productivityScore}%</span>
             </div>
-            <span className="text-xs text-slate-400">{stats.todayStudyMinutes}m / {goalMinutes}m daily goal</span>
+
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-medium">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>{completedTasksCount} Completed</span>
+            </div>
+
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 font-medium">
+              <span>{pendingTasksCount} Pending Tasks</span>
+            </div>
+
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 font-medium">
+              <Flame className="w-3.5 h-3.5" />
+              <span>{stats.currentStreak} Day Streak</span>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <button onClick={() => setShowCustomizer(!showCustomizer)}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-medium border border-slate-700 transition-all">
+        <div className="flex items-center gap-3 self-start md:self-center">
+          <button
+            onClick={() => setShowCustomizer(!showCustomizer)}
+            className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition-all"
+          >
             <SlidersHorizontal className="w-3.5 h-3.5 text-cyan-400" />
             {savingWidgets ? 'Saving...' : 'Customize'}
           </button>
-          <Link href="/tools" className="flex items-center gap-2 px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold shadow-lg shadow-cyan-500/20 transition-all">
+          <Link
+            href="/tracker"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-bold shadow-lg shadow-cyan-500/20 transition-all"
+          >
             <Play className="w-3.5 h-3.5 fill-current" /> Start Study Timer
           </Link>
         </div>

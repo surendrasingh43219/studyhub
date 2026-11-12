@@ -17,9 +17,9 @@ import {
 } from 'lucide-react'
 
 export const metadata = {
-  title: 'StudyHub Pro | Open-Access Digital Library & Student Productivity Platform',
+  title: 'StudyHub | Personal Student Progress & Productivity Platform',
   description:
-    'Explore thousands of free open-source textbooks in our public library, track study hours, organize exam countdowns, and build daily study habits on your private dashboard.',
+    'Your Progress. Your Goals. Your Future. A 100% free personal student command center to organize education, track daily routines, master exams, and develop skills.',
 }
 
 export default function LandingPage() {
@@ -32,11 +32,11 @@ export default function LandingPage() {
             <div className="w-9 h-9 rounded-xl bg-cyan-600/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 shadow-md shadow-cyan-500/10">
               <BookOpen className="w-5 h-5" />
             </div>
-            <span>Study<span className="text-cyan-400">Hub</span> <span className="text-[10px] bg-cyan-500/15 text-cyan-300 px-1.5 py-0.5 rounded font-mono font-normal">PRO</span></span>
+            <span>Study<span className="text-cyan-400">Hub</span> <span className="text-[10px] bg-cyan-500/15 text-cyan-300 px-1.5 py-0.5 rounded font-mono font-normal">FREE</span></span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 text-sm text-slate-300">
-            <Link href="/library" className="hover:text-white transition-colors">Public Library</Link>
+            <Link href="/library" className="hover:text-white transition-colors">Book Library</Link>
             <Link href="/guides" className="hover:text-white transition-colors">Study Guides</Link>
             <Link href="/about" className="hover:text-white transition-colors">About</Link>
             <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
@@ -67,15 +67,16 @@ export default function LandingPage() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative text-center space-y-6">
             <div className="inline-flex items-center gap-2 py-1.5 px-3.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-xs font-semibold text-cyan-400">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Free Open Digital Library & Private Study Platform</span>
+              <span>100% Free Forever • Personal Student Command Center</span>
             </div>
 
             <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight text-white max-w-4xl mx-auto leading-tight">
-              Master Your Exams with an <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Open Digital Library</span> & Focus Tools
+              Your Progress. Your Goals. <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Your Future.</span>
             </h1>
 
             <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
-              Access thousands of openly licensed textbooks, track your daily study hours, organize exam countdowns, and build consistent habits on your completely private study dashboard.
+              The modern, completely free student productivity platform. Organize daily study routines, track tasks with instant tick/untick sync across all your devices, manage examination syllabi, develop career skills, and access our integrated digital book library.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-4">
@@ -83,7 +84,7 @@ export default function LandingPage() {
                 href="/signup"
                 className="w-full sm:w-auto py-3.5 px-7 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-xl text-sm shadow-lg shadow-cyan-600/25 transition-all flex items-center justify-center gap-2"
               >
-                <span>Create Your Free Account</span>
+                <span>Build Your Personal StudyHub</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
@@ -91,7 +92,7 @@ export default function LandingPage() {
                 className="w-full sm:w-auto py-3.5 px-7 bg-slate-900 hover:bg-slate-800 border border-slate-700/80 text-slate-200 font-semibold rounded-xl text-sm transition-all flex items-center justify-center gap-2"
               >
                 <Compass className="w-4 h-4 text-cyan-400" />
-                <span>Explore Public Library</span>
+                <span>Explore Book Library</span>
               </Link>
             </div>
 

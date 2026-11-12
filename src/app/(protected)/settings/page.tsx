@@ -99,6 +99,58 @@ export default function SettingsPage() {
         </div>
       )}
 
+      {/* Active Devices & Internet Sync */}
+      <div className="bg-slate-900/70 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-base font-bold text-white flex items-center gap-2">
+            <Smartphone className="w-4 h-4 text-cyan-400" /> Connected Devices & Internet Sync
+          </h2>
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+            ONLINE SYNC ACTIVE
+          </span>
+        </div>
+        <p className="text-xs text-slate-400 leading-relaxed">
+          Your tasks, focus timer, and study records synchronize in real-time across every internet-connected browser and device.
+        </p>
+
+        <div className="space-y-2.5">
+          {/* Current Device */}
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-950 border border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center font-bold">
+                💻
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-white">This Web Browser (Current Device)</span>
+                  <span className="text-[9px] bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 rounded font-mono">CURRENT</span>
+                </div>
+                <p className="text-[11px] text-slate-400">
+                  Full command center, fast task tick/untick toggle, responsive 320px–1440px layout.
+                </p>
+              </div>
+            </div>
+            <span className="text-[10px] text-emerald-400 font-mono font-semibold">Active Now</span>
+          </div>
+
+          {/* Mobile / Tablet Device */}
+          <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-950 border border-slate-800">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold">
+                📱
+              </div>
+              <div>
+                <span className="text-xs font-bold text-white">Mobile & Tablet Web</span>
+                <p className="text-[11px] text-slate-400">
+                  Bottom navigation bar, compact study timer, instant checkbox task completion.
+                </p>
+              </div>
+            </div>
+            <span className="text-[10px] text-slate-400 font-mono">Synced via Cloud</span>
+          </div>
+        </div>
+      </div>
+
       {/* Session Management */}
       <div className="bg-slate-900/70 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-4">
         <h2 className="text-base font-bold text-white flex items-center gap-2">

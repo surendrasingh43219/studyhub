@@ -4,9 +4,9 @@ import { useState } from 'react'
 import { User, Lock, Globe, Bell, Palette, Type, Check, Sparkles, Shield } from 'lucide-react'
 
 export default function ProfilePage() {
-  const [fullName, setFullName] = useState('Surendra Scholar')
-  const [username, setUsername] = useState('surendra')
-  const [bio, setBio] = useState('CS & Mathematics student focusing on compilers and distributed systems.')
+  const [fullName, setFullName] = useState('Student Scholar')
+  const [username, setUsername] = useState('scholar')
+  const [bio, setBio] = useState('Dedicated student tracking academic progress, exams, and professional development.')
   const [isPublic, setIsPublic] = useState(false) // Default PRIVATE as mandated
   const [fontSize, setFontSize] = useState<'sm' | 'md' | 'lg'>('md')
   const [themeColor, setThemeColor] = useState<'cyan' | 'indigo' | 'emerald' | 'amber'>('cyan')

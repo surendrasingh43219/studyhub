@@ -50,7 +50,7 @@ export default async function DashboardPage() {
     { data: studySessions },
   ] = await Promise.all([
     supabase.from('dashboard_widgets').select('widgets_config').eq('user_id', user.id).single(),
-    supabase.from('tasks').select('*').eq('user_id', user.id).eq('is_completed', false).order('created_at', { ascending: false }).limit(20),
+    supabase.from('tasks').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(30),
     supabase.from('user_exams').select('*').eq('user_id', user.id).eq('is_completed', false).order('exam_date', { ascending: true }),
     supabase.from('user_subjects').select('*').eq('user_id', user.id).eq('is_active', true).order('created_at', { ascending: false }),
     supabase.from('user_goals').select('*').eq('user_id', user.id).eq('is_completed', false).order('created_at', { ascending: false }).limit(10),
