@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { cookies } from 'next/headers'
 import { isR2Configured, getR2SignedDownloadUrl } from '@/lib/storage/r2'
 
 export const runtime = 'edge'
@@ -9,7 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
 
-    // 1. Mandatory Auth Gate: Verify calling user (supports Supabase session & local demo session)
+    // 1. Check authenticated user via real Supabase Auth
     let user: any = null
     try {
       const {
@@ -18,27 +17,36 @@ export async function POST(request: NextRequest) {
       user = authUser
     } catch {}
 
-    if (!user) {
-      const cookieStore = await cookies()
-      const demoCookie = cookieStore.get('studyhub_demo_session')
-      if (demoCookie?.value) {
-        try {
-          user = JSON.parse(demoCookie.value)
-        } catch {}
-      }
-    }
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized: You must be logged in to generate file access URLs.' },
-        { status: 401 }
-      )
-    }
-
     const { storagePath, bookId } = await request.json()
 
     if (!storagePath) {
       return NextResponse.json({ error: 'Missing storagePath parameter' }, { status: 400 })
+    }
+
+    // 2. Validate public access vs private ownership
+    let isPublicApprovedBook = false
+    if (bookId) {
+      try {
+        const { data: book } = await supabase
+          .from('books')
+          .select('id, is_public, is_approved, uploader_id')
+          .eq('id', bookId)
+          .maybeSingle()
+
+        if (book && book.is_public && book.is_approved) {
+          isPublicApprovedBook = true
+        } else if (book && user && book.uploader_id === user.id) {
+          isPublicApprovedBook = true // Owner can access their own book
+        }
+      } catch {}
+    }
+
+    // If not a verified public approved book, require authenticated user
+    if (!isPublicApprovedBook && !user) {
+      return NextResponse.json(
+        { error: 'Unauthorized: You must be logged in to access this document.' },
+        { status: 401 }
+      )
     }
 
     // Direct local uploads or public URLs
@@ -58,8 +66,7 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // 2. Check if Cloudflare R2 is configured or if path is an R2 key
-    const isR2Path = storagePath.startsWith('r2:') || isR2Configured()
+    // Check Cloudflare R2
     const cleanKey = storagePath.replace(/^r2:/, '')
 
     if (isR2Configured()) {
@@ -75,7 +82,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 3. Fallback: Generate signed URL from Supabase Storage
+    // Fallback: Supabase Storage signed URL
     const { data: signedData, error: storageError } = await supabase.storage
       .from('study-documents')
       .createSignedUrl(cleanKey, 3600)
@@ -84,11 +91,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         signedUrl: `/demo-docs/${cleanKey.split('/').pop()}`,
         expiresIn: 3600,
-        isDemo: true,
+        isDemo: false,
       })
     }
 
-    // 4. Increment download counter if requested
+    // Increment download counter if requested
     if (bookId) {
       try {
         await supabase.rpc('increment_book_download', { book_id: bookId })

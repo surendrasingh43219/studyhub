@@ -15,9 +15,12 @@ export async function POST(request: NextRequest) {
       await supabase.auth.signOut({
         scope: allDevices ? 'global' : 'local',
       })
-    } catch {}
+    } catch (e) {
+      console.warn('Supabase sign out error:', e)
+    }
 
-    const response = NextResponse.json({ success: true })
+    const response = NextResponse.json({ success: true, message: 'Signed out successfully' })
+    // Ensure legacy demo cookies are always scrubbed
     response.cookies.delete('studyhub_demo_session')
 
     return response

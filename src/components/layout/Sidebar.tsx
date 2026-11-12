@@ -32,7 +32,6 @@ export function Sidebar({ userRole = 'user' }: SidebarProps) {
     { name: 'Library', href: '/library', icon: BookOpen },
     { name: 'Study Tools', href: '/tools', icon: Timer },
     { name: 'My Notes', href: '/notes', icon: StickyNote },
-    { name: 'Flashcards', href: '/flashcards', icon: BookMarked },
     { name: 'Profile', href: '/profile', icon: User },
     { name: 'Settings', href: '/settings', icon: Settings },
   ]

@@ -11,7 +11,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'StudyHub | Open-Source Digital Library & Study Platform',
   description: 'Full-stack study platform with an open-source digital library, personal dashboards, and deep-focus study tools.',
-  keywords: ['StudyHub', 'Digital Library', 'Study Platform', 'PDF Reader', 'Pomodoro Timer', 'Flashcards'],
+  keywords: ['StudyHub Pro', 'Digital Library', 'Study Platform', 'PDF Reader', 'Pomodoro Timer', 'Study Planner', 'Exam Preparation', 'Study Tracker'],
   authors: [{ name: 'StudyHub Platform' }],
   verification: {
     google: '4c518c375c3a50f6',

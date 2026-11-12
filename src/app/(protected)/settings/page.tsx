@@ -36,10 +36,6 @@ export default function SettingsPage() {
           { date: '2026-11-01', durationSeconds: 2700, subject: 'Computer Science' },
           { date: '2026-11-02', durationSeconds: 3600, subject: 'Mathematics' },
         ],
-        flashcards: [
-          { question: 'Church-Turing thesis', repetitions: 2 },
-          { question: 'Amdahl\'s law', repetitions: 4 },
-        ],
       }
 
       const blob = new Blob([JSON.stringify(userDataArchive, null, 2)], { type: 'application/json' })
@@ -136,7 +132,7 @@ export default function SettingsPage() {
           <Download className="w-4 h-4 text-emerald-400" /> GDPR Data Portability (Export)
         </h2>
         <p className="text-xs text-slate-400 leading-relaxed">
-          Under GDPR Article 20, you have the right to receive your personal telemetry, notes, reading progress, and flashcard records in a structured, machine-readable format.
+          Under GDPR Article 20, you have the right to receive your personal telemetry, notes, reading progress, and study records in a structured, machine-readable format.
         </p>
 
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-slate-950 border border-slate-800">

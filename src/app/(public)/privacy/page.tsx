@@ -37,7 +37,7 @@ export default function PrivacyPage() {
             <Database className="w-5 h-5 text-cyan-400" /> 1. Row-Level Security & Strict Data Isolation
           </h2>
           <p className="text-slate-400 leading-relaxed text-sm">
-            All user data—including study sessions, bookmarks, private highlights, notes, flashcards, and personal study timers—is strictly partitioned via PostgreSQL Row Level Security (RLS). Every query enforces <code className="bg-slate-900 px-2 py-0.5 rounded text-cyan-400 text-xs">auth.uid() = user_id</code> at the database engine level. No user or third party can query or intercept your private records, even by guessing IDs.
+            All user data—including study sessions, bookmarks, private highlights, notes, goals, and personal study timers—is strictly partitioned via PostgreSQL Row Level Security (RLS). Every query enforces <code className="bg-slate-900 px-2 py-0.5 rounded text-cyan-400 text-xs">auth.uid() = user_id</code> at the database engine level. No user or third party can query or intercept your private records, even by guessing IDs.
           </p>
         </section>
 
@@ -60,7 +60,7 @@ export default function PrivacyPage() {
                 <Download className="w-4 h-4 text-emerald-400" /> Data Portability (Export)
               </div>
               <p className="text-slate-400 text-xs">
-                Under Profile Settings, you can download a complete JSON and Markdown bundle of all your personal notes, flashcards, and study metrics at any time.
+                Under Profile Settings, you can download a complete JSON and Markdown bundle of all your personal notes, tasks, and study metrics at any time.
               </p>
             </div>
             <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">

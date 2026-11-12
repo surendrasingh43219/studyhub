@@ -13,7 +13,8 @@
     "deploy:cloudflare": "npx @cloudflare/next-on-pages && npx wrangler pages deploy .vercel/output/static --project-name studyhub",
     "test:auth": "node tests/auth-guard.test.js",
     "test:personalization": "node tests/personalization.test.js",
-    "test": "node tests/auth-guard.test.js && node tests/personalization.test.js"
+    "test:security": "node tests/security-suite.test.js",
+    "test": "node tests/auth-guard.test.js && node tests/personalization.test.js && node tests/security-suite.test.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1162.0",

@@ -84,9 +84,14 @@ export function LibraryClientView({
   const [reportReason, setReportReason] = useState('')
   const [reportSubmitted, setReportSubmitted] = useState(false)
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
+  const [authPromptOpen, setAuthPromptOpen] = useState(false)
 
   // Toggle bookmark
   const toggleBookmark = (bookId: string) => {
+    if (!currentUserId) {
+      setAuthPromptOpen(true)
+      return
+    }
     setBookmarkedSet((prev) => {
       const next = new Set(prev)
       if (next.has(bookId)) {
@@ -431,6 +436,43 @@ export function LibraryClientView({
                 </div>
               </form>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Auth Prompt Modal */}
+      {authPromptOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-5 text-center shadow-2xl relative">
+            <button
+              onClick={() => setAuthPromptOpen(false)}
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center mx-auto">
+              <Bookmark className="w-7 h-7" />
+            </div>
+            <div className="space-y-2">
+              <h3 className="text-xl font-bold text-white">Save to Your Bookshelf</h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Saving bookmarks, syncing reading progress, and highlighting notes requires a free StudyHub account.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-2.5 pt-2">
+              <Link
+                href="/signin?returnTo=/library"
+                className="flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition-all"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/signup?returnTo=/library"
+                className="flex-1 py-2.5 px-4 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition-all shadow-md shadow-cyan-600/20"
+              >
+                Create Account
+              </Link>
+            </div>
           </div>
         </div>
       )}

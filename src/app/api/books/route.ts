@@ -112,7 +112,7 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient()
 
-    // 1. Auth Check (supports real Supabase session and local session)
+    // 1. Auth Check (strictly requires authenticated Supabase user)
     let user: any = null
     try {
       const {
@@ -120,16 +120,6 @@ export async function POST(request: NextRequest) {
       } = await supabase.auth.getUser()
       user = authUser
     } catch {}
-
-    if (!user) {
-      const cookieStore = await cookies()
-      const demoCookie = cookieStore.get('studyhub_demo_session')
-      if (demoCookie?.value) {
-        try {
-          user = JSON.parse(demoCookie.value)
-        } catch {}
-      }
-    }
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized: Please sign in to upload.' }, { status: 401 })

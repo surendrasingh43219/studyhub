@@ -82,7 +82,7 @@ export default function ProfilePage() {
             <Shield className="w-4 h-4 text-emerald-400" /> Privacy & Isolation Settings
           </h2>
           <p className="text-xs text-slate-400">
-            By default, all study logs, notes, streaks, and flashcards are completely private and accessible only by you via PostgreSQL Row Level Security.
+            By default, all study logs, notes, streaks, and personal tasks are completely private and accessible only by you via PostgreSQL Row Level Security.
           </p>
 
           <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">

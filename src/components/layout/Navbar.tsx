@@ -46,9 +46,19 @@ export function Navbar({ user }: NavbarProps) {
   }
 
   return (
-    <header className="h-16 border-b border-slate-800 bg-slate-900/80 backdrop-blur-md px-6 flex items-center justify-between sticky top-0 z-30">
+    <header className="h-16 border-b border-slate-800 bg-[#0c0d14]/90 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-30">
+      {/* Mobile Brand Link */}
+      <div className="flex items-center gap-2 md:hidden">
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-md shadow-cyan-500/20">
+            <BookOpen className="w-4 h-4" />
+          </div>
+          <span className="font-bold text-base text-white">Study<span className="text-cyan-400">Hub</span></span>
+        </Link>
+      </div>
+
       {/* Global Search Bar */}
-      <form onSubmit={handleSearchSubmit} className="relative w-full max-w-md hidden sm:block">
+      <form onSubmit={handleSearchSubmit} className="relative w-full max-w-md hidden md:block">
         <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
         <input
           type="text"

@@ -3,10 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 import { signUpSchema, type SignUpInput } from '@/lib/validations/auth'
 import { PasswordStrengthMeter } from '@/components/auth/PasswordStrengthMeter'
-import { Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { OtpVerificationForm } from '@/components/auth/OtpVerificationForm'
+import { Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react'
 
 export function SignUpForm() {
   const router = useRouter()
@@ -23,14 +23,13 @@ export function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [serverError, setServerError] = useState<string | null>(null)
-  const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  const [pendingVerificationEmail, setPendingVerificationEmail] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrors({})
     setServerError(null)
-    setSuccessMessage(null)
 
     const validation = signUpSchema.safeParse(formData)
     if (!validation.success) {
@@ -62,15 +61,13 @@ export function SignUpForm() {
         throw new Error(data.error || 'Could not complete registration.')
       }
 
-      // If instant session is returned (e.g. local dev / demo mode)
-      // Redirect to onboarding wizard to personalize dashboard
-      if (data.user) {
+      // If user requires 6-digit OTP verification (standard Supabase email verification flow)
+      if (data.requiresVerification || !data.user) {
+        setPendingVerificationEmail(formData.email.trim().toLowerCase())
+      } else {
+        // Direct session established
         router.push('/onboarding')
         router.refresh()
-      } else {
-        setSuccessMessage(
-          'Registration successful! Please check your email inbox to verify your account before signing in.'
-        )
       }
     } catch (err: any) {
       setServerError(err.message || 'Could not complete registration. Please try again.')
@@ -79,22 +76,9 @@ export function SignUpForm() {
     }
   }
 
-  if (successMessage) {
-    return (
-      <div className="p-6 bg-slate-900 border border-slate-800 rounded-2xl text-center space-y-4">
-        <div className="w-12 h-12 bg-green-500/10 text-green-400 rounded-full flex items-center justify-center mx-auto">
-          <CheckCircle2 className="w-6 h-6" />
-        </div>
-        <h3 className="text-lg font-semibold text-slate-100">Check Your Email</h3>
-        <p className="text-sm text-slate-400">{successMessage}</p>
-        <Link
-          href="/signin"
-          className="inline-block py-2 px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-medium transition-all"
-        >
-          Return to Sign In
-        </Link>
-      </div>
-    )
+  // If waiting for OTP code verification, render the 6-digit verification screen
+  if (pendingVerificationEmail) {
+    return <OtpVerificationForm initialEmail={pendingVerificationEmail} />
   }
 
   return (
@@ -115,7 +99,8 @@ export function SignUpForm() {
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           placeholder="e.g. Alex Sharma"
           disabled={loading}
-          className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          autoComplete="name"
+          className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all disabled:opacity-50"
         />
         {errors.name && <p className="text-xs text-red-400 mt-1">{errors.name}</p>}
       </div>
@@ -126,7 +111,7 @@ export function SignUpForm() {
           Unique Username
         </label>
         <div className="relative">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">@</span>
+          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 text-sm">@</span>
           <input
             type="text"
             value={formData.username}
@@ -135,7 +120,8 @@ export function SignUpForm() {
             }
             placeholder="username"
             disabled={loading}
-            className="w-full pl-8 pr-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+            autoComplete="username"
+            className="w-full pl-8 pr-3.5 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all disabled:opacity-50"
           />
         </div>
         {errors.username && <p className="text-xs text-red-400 mt-1">{errors.username}</p>}
@@ -150,7 +136,8 @@ export function SignUpForm() {
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           placeholder="you@example.com"
           disabled={loading}
-          className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          autoComplete="email"
+          className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all disabled:opacity-50"
         />
         {errors.email && <p className="text-xs text-red-400 mt-1">{errors.email}</p>}
       </div>
@@ -165,12 +152,14 @@ export function SignUpForm() {
             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
             placeholder="Min. 8 characters"
             disabled={loading}
-            className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all pr-10"
+            autoComplete="new-password"
+            className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all pr-10 disabled:opacity-50"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-200"
+            tabIndex={-1}
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
@@ -188,7 +177,8 @@ export function SignUpForm() {
           onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
           placeholder="Re-type password"
           disabled={loading}
-          className="w-full px-3.5 py-2 bg-slate-900 border border-slate-700 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+          autoComplete="new-password"
+          className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700/80 rounded-xl text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500 transition-all disabled:opacity-50"
         />
         {errors.confirmPassword && (
           <p className="text-xs text-red-400 mt-1">{errors.confirmPassword}</p>
@@ -202,15 +192,15 @@ export function SignUpForm() {
           id="agreeToTerms"
           checked={formData.agreeToTerms}
           onChange={(e) => setFormData({ ...formData, agreeToTerms: e.target.checked })}
-          className="w-4 h-4 mt-0.5 rounded bg-slate-900 border-slate-700 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-900"
+          className="w-4 h-4 mt-0.5 rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-400 focus:ring-offset-slate-900"
         />
         <label htmlFor="agreeToTerms" className="text-xs text-slate-400 leading-normal cursor-pointer">
           I agree to the{' '}
-          <Link href="/terms" target="_blank" className="text-blue-400 hover:underline">
+          <Link href="/terms" target="_blank" className="text-cyan-400 hover:underline">
             Terms of Service
           </Link>{' '}
           and{' '}
-          <Link href="/privacy" target="_blank" className="text-blue-400 hover:underline">
+          <Link href="/privacy" target="_blank" className="text-cyan-400 hover:underline">
             Privacy Policy
           </Link>
           .
@@ -224,12 +214,12 @@ export function SignUpForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-medium rounded-xl text-sm shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+        className="w-full py-2.5 px-4 bg-cyan-600 hover:bg-cyan-500 active:bg-cyan-700 text-white font-medium rounded-xl text-sm shadow-md shadow-cyan-600/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
       >
         {loading ? (
           <>
             <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Creating account...</span>
+            <span>Sending verification code...</span>
           </>
         ) : (
           <span>Create Free Account</span>

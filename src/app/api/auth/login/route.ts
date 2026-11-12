@@ -5,55 +5,57 @@ export const runtime = 'edge'
 
 export async function POST(request: NextRequest) {
   try {
-    const { email, password, isDemo } = await request.json()
+    const { email, password } = await request.json()
 
-    // 1. If it's explicit demo login or credentials contain placeholder
-    const isPlaceholderConfig =
-      !process.env.NEXT_PUBLIC_SUPABASE_URL ||
-      process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
-
-    if (isDemo || isPlaceholderConfig) {
-      // Create local authenticated session cookie
-      const demoUser = {
-        id: '00000000-0000-0000-0000-000000000001',
-        email: email || 'surendra@studyhub.local',
-        user_metadata: {
-          full_name: 'Surendra Scholar',
-          username: 'surendra',
-          role: 'admin',
-        },
-      }
-
-      const response = NextResponse.json({
-        success: true,
-        user: demoUser,
-        message: 'Logged in successfully (Local Demo Mode)',
-      })
-
-      // Set session cookie (httpOnly, secure in prod)
-      response.cookies.set('studyhub_demo_session', JSON.stringify(demoUser), {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-      })
-
-      return response
+    if (!email || !password) {
+      return NextResponse.json(
+        { error: 'Email and password are required.' },
+        { status: 400 }
+      )
     }
 
-    // 2. Real Supabase Auth
+    const cleanEmail = email.trim().toLowerCase()
+
+    // Real Supabase Auth authentication
     const supabase = await createClient()
     const { data, error } = await supabase.auth.signInWithPassword({
-      email,
+      email: cleanEmail,
       password,
     })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 })
+      // Check for unverified email error
+      const isUnverified =
+        error.message.toLowerCase().includes('email not confirmed') ||
+        error.message.toLowerCase().includes('not confirmed')
+
+      return NextResponse.json(
+        {
+          error: isUnverified
+            ? 'Your email address has not been verified yet. Please enter the 6-digit verification code sent to your inbox.'
+            : error.message,
+          isUnverified,
+          email: isUnverified ? cleanEmail : undefined,
+        },
+        { status: 400 }
+      )
     }
 
-    return NextResponse.json({ success: true, user: data.user })
+    if (!data.user) {
+      return NextResponse.json(
+        { error: 'Invalid login credentials.' },
+        { status: 401 }
+      )
+    }
+
+    return NextResponse.json({
+      success: true,
+      user: {
+        id: data.user.id,
+        email: data.user.email,
+        user_metadata: data.user.user_metadata,
+      },
+    })
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || 'An unexpected authentication error occurred.' },

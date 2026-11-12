@@ -1,26 +1,42 @@
-import { cookies } from 'next/headers'
-import { redirect, notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { BookReaderClient } from '@/components/reader/BookReaderClient'
 import { getLocalUploadedBooks } from '@/lib/books-store'
+import { notFound, redirect } from 'next/navigation'
 
 export const runtime = 'edge'
 
-interface ReaderPageProps {
+export async function generateMetadata({
+  params,
+}: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ page?: string }>
-}
-
-export async function generateMetadata({ params }: ReaderPageProps) {
+}) {
   const { id } = await params
+  const supabase = await createClient()
+  const { data: book } = await supabase.from('books').select('title, author').eq('id', id).maybeSingle()
+
+  if (book) {
+    return {
+      title: `${book.title} | StudyHub Reader`,
+      description: `Read ${book.title} by ${book.author} on StudyHub.`,
+    }
+  }
+
   return {
-    title: `Reading Book | StudyHub`,
+    title: 'StudyHub Document Reader',
+    description: 'Read educational books and reference material.',
   }
 }
 
-export default async function ReaderPage({ params, searchParams }: ReaderPageProps) {
+export default async function ReaderPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ page?: string }>
+}) {
   const { id } = await params
   const { page } = await searchParams
+
   const supabase = await createClient()
 
   let user: any = null
@@ -30,18 +46,6 @@ export default async function ReaderPage({ params, searchParams }: ReaderPagePro
     } = await supabase.auth.getUser()
     user = authUser
   } catch {}
-
-  if (!user) {
-    const cookieStore = await cookies()
-    const demoCookie = cookieStore.get('studyhub_demo_session')
-    if (demoCookie?.value) {
-      try {
-        user = JSON.parse(demoCookie.value)
-      } catch {}
-    }
-  }
-
-  if (!user) redirect('/signin')
 
   // 1. Fetch book record
   let bookData: any = null
@@ -58,27 +62,34 @@ export default async function ReaderPage({ params, searchParams }: ReaderPagePro
     const found = localBooks.find((b) => b.id === id)
     if (found) {
       bookData = found
-    } else {
-      bookData = {
-        id,
-        title: 'Document Reader',
-        author: 'StudyHub',
-        file_format: 'pdf',
-        page_count: 527,
-        storage_path: '',
-      }
     }
   }
 
-  // 2. Fetch last read page from reading_progress (isolated by user_id = auth.uid())
-  const { data: progress } = await supabase
-    .from('reading_progress')
-    .select('current_page')
-    .eq('book_id', id)
-    .eq('user_id', user.id)
-    .maybeSingle()
+  if (!bookData) {
+    notFound()
+  }
 
-  const initialPage = page ? parseInt(page, 10) : progress?.current_page || 1
+  // If the book is not public/approved, user must be the authenticated uploader
+  if (!bookData.is_public || !bookData.is_approved) {
+    if (!user || user.id !== bookData.uploader_id) {
+      redirect('/signin')
+    }
+  }
+
+  // 2. Fetch last read page from reading_progress if authenticated
+  let initialPage = 1
+  if (user?.id) {
+    const { data: progress } = await supabase
+      .from('reading_progress')
+      .select('current_page')
+      .eq('book_id', id)
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    initialPage = page ? parseInt(page, 10) : progress?.current_page || 1
+  } else if (page) {
+    initialPage = parseInt(page, 10) || 1
+  }
 
   const rawPath = bookData.file_path || bookData.storage_path || ''
   let fileUrl = `/api/books/${id}/pdf`
@@ -102,7 +113,7 @@ export default async function ReaderPage({ params, searchParams }: ReaderPagePro
         storagePath: rawPath,
         fileUrl,
       }}
-      currentUserId={user.id}
+      currentUserId={user?.id || ''}
     />
   )
 }

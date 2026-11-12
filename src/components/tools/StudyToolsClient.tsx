@@ -24,7 +24,7 @@ import {
 } from 'lucide-react'
 
 export function StudyToolsClient() {
-  const [activeTab, setActiveTab] = useState<'pomodoro' | 'ambient' | 'ai' | 'flashcards' | 'habits'>('pomodoro')
+  const [activeTab, setActiveTab] = useState<'pomodoro' | 'ambient' | 'ai'>('pomodoro')
 
   // Pomodoro State
   const [pomodoroSeconds, setPomodoroSeconds] = useState(25 * 60)
@@ -46,30 +46,6 @@ export function StudyToolsClient() {
   const [aiAction, setAiAction] = useState<'explain' | 'summarize' | 'quiz'>('explain')
   const [aiLoading, setAiLoading] = useState(false)
   const [aiResponse, setAiResponse] = useState<string | null>(null)
-
-  // Flashcards state (Spaced Repetition)
-  const [flashcards, setFlashcards] = useState([
-    {
-      id: '1',
-      question: 'What is the Church-Turing thesis?',
-      answer: 'Any computation that can be algorithmically executed can be computed by a Universal Turing Machine.',
-      repetitions: 2,
-    },
-    {
-      id: '2',
-      question: 'What is tail-call optimization (TCO)?',
-      answer: 'A compiler optimization where a subroutine call at the end of a procedure does not create a new stack frame.',
-      repetitions: 4,
-    },
-    {
-      id: '3',
-      question: 'Define the First Fundamental Theorem of Calculus.',
-      answer: 'If f is continuous on [a, b], then the function g(x) = integral from a to x of f(t)dt is continuous on [a, b], differentiable on (a, b), and g\'(x) = f(x).',
-      repetitions: 1,
-    },
-  ])
-  const [currentCardIndex, setCurrentCardIndex] = useState(0)
-  const [cardFlipped, setCardFlipped] = useState(false)
 
   // Timer Interval
   useEffect(() => {
@@ -216,7 +192,7 @@ export function StudyToolsClient() {
             <Timer className="w-7 h-7 text-cyan-400" /> Study Tools & Focus Room
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Pomodoro interval timer, ambient noise generators, flashcards, and AI study assistant.
+            Pomodoro interval timer, ambient noise generators, and AI study partner.
           </p>
         </div>
 
@@ -251,16 +227,6 @@ export function StudyToolsClient() {
             }`}
           >
             AI Study Partner
-          </button>
-          <button
-            onClick={() => setActiveTab('flashcards')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-              activeTab === 'flashcards'
-                ? 'bg-cyan-500 text-slate-950 font-bold shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Spaced Flashcards
           </button>
         </div>
       </div>
@@ -536,73 +502,6 @@ export function StudyToolsClient() {
                 {aiResponse}
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* 4. Spaced Repetition Flashcards */}
-      {activeTab === 'flashcards' && (
-        <div className="bg-slate-900/70 border border-slate-800 rounded-3xl p-6 sm:p-8 space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Layers className="w-5 h-5 text-indigo-400" /> Active Recall Flashcards
-              </h2>
-              <p className="text-xs text-slate-400 mt-1">SuperMemo SM-2 algorithm intervals</p>
-            </div>
-            <span className="text-xs font-mono text-cyan-400">
-              Card {currentCardIndex + 1} of {flashcards.length}
-            </span>
-          </div>
-
-          <div
-            onClick={() => setCardFlipped(!cardFlipped)}
-            className="min-h-56 p-8 rounded-2xl bg-slate-950 border border-slate-800 hover:border-cyan-500/40 flex flex-col items-center justify-center text-center cursor-pointer transition-all shadow-inner relative group"
-          >
-            <span className="text-[10px] uppercase font-mono tracking-wider text-slate-500 absolute top-4 left-4">
-              {cardFlipped ? 'Answer (Click to flip back)' : 'Question (Click to flip)'}
-            </span>
-
-            <div className="text-base sm:text-lg font-bold text-white max-w-lg">
-              {cardFlipped
-                ? flashcards[currentCardIndex].answer
-                : flashcards[currentCardIndex].question}
-            </div>
-
-            <span className="text-xs text-cyan-400 opacity-60 group-hover:opacity-100 transition-opacity mt-4">
-              Tap card to reveal answer &rarr;
-            </span>
-          </div>
-
-          {/* Difficulty feedback */}
-          <div className="flex items-center justify-center gap-3">
-            <button
-              onClick={() => {
-                setCardFlipped(false)
-                setCurrentCardIndex((i) => (i + 1) % flashcards.length)
-              }}
-              className="px-4 py-2 rounded-xl bg-rose-500/20 text-rose-300 hover:bg-rose-500/30 text-xs font-semibold"
-            >
-              Hard (Repeat 1d)
-            </button>
-            <button
-              onClick={() => {
-                setCardFlipped(false)
-                setCurrentCardIndex((i) => (i + 1) % flashcards.length)
-              }}
-              className="px-4 py-2 rounded-xl bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 text-xs font-semibold"
-            >
-              Good (Repeat 3d)
-            </button>
-            <button
-              onClick={() => {
-                setCardFlipped(false)
-                setCurrentCardIndex((i) => (i + 1) % flashcards.length)
-              }}
-              className="px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 text-xs font-semibold"
-            >
-              Easy (Repeat 6d)
-            </button>
           </div>
         </div>
       )}

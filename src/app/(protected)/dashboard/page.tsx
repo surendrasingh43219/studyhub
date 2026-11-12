@@ -6,8 +6,12 @@ import { redirect } from 'next/navigation'
 export const runtime = 'edge'
 
 export const metadata = {
-  title: 'Dashboard | StudyHub',
+  title: 'Dashboard | StudyHub Pro',
   description: 'Your private personalized study dashboard.',
+  robots: {
+    index: false,
+    follow: false,
+  },
 }
 
 export default async function DashboardPage() {
@@ -18,14 +22,6 @@ export default async function DashboardPage() {
     const { data: { user: authUser } } = await supabase.auth.getUser()
     user = authUser
   } catch {}
-
-  if (!user) {
-    const cookieStore = await cookies()
-    const demoCookie = cookieStore.get('studyhub_demo_session')
-    if (demoCookie?.value) {
-      try { user = JSON.parse(demoCookie.value) } catch {}
-    }
-  }
 
   if (!user) redirect('/signin')
 
